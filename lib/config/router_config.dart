@@ -6,6 +6,10 @@ import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
 import '../features/auth/presentation/pages/forgot_password_page.dart';
 import '../features/auth/presentation/pages/home_page.dart';
+import '../features/property/presentation/pages/properties_list_page.dart';
+import '../features/property/presentation/pages/property_details_page.dart';
+import '../features/property/presentation/pages/add_property_page.dart';
+import '../features/property/presentation/pages/my_properties_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -43,8 +47,32 @@ class AppRouter {
         builder: (context, state) => const HomePage(),
       ),
 
+      // Property Routes
+      GoRoute(
+        path: AppRoutes.properties,
+        name: 'properties',
+        builder: (context, state) => const PropertiesListPage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.propertyDetails}/:id',
+        name: 'propertyDetails',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['id']!;
+          return PropertyDetailsPage(propertyId: propertyId);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.addProperty,
+        name: 'addProperty',
+        builder: (context, state) => const AddPropertyPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.myProperties,
+        name: 'myProperties',
+        builder: (context, state) => const MyPropertiesPage(),
+      ),
+
       // TODO: Add more routes as features are implemented
-      // - Properties
       // - Barter requests
       // - Messages
       // - Profile

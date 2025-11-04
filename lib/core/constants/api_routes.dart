@@ -51,10 +51,11 @@ class AppRoutes {
   static const String profile = '/profile';
 
   // Property Routes
-  static const String propertyDetails = '/property/:id';
+  static const String properties = '/properties';
+  static const String propertyDetails = '/property';
   static const String addProperty = '/property/add';
-  static const String editProperty = '/property/:id/edit';
-  static const String propertyImages = '/property/:id/images';
+  static const String editProperty = '/property/edit';
+  static const String propertyImages = '/property/images';
 
   // Barter Routes
   static const String createBarter = '/barter/create';

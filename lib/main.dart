@@ -8,6 +8,7 @@ import 'config/app_config.dart';
 import 'config/app_theme.dart';
 import 'config/router_config.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/property/presentation/bloc/property_bloc.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
@@ -64,8 +65,12 @@ class HouseBartApp extends StatelessWidget {
           create: (_) => di.sl<AuthBloc>(),
         ),
 
+        // Property BLoC - available throughout the app
+        BlocProvider(
+          create: (_) => di.sl<PropertyBloc>(),
+        ),
+
         // TODO: Add more BLoCs as features are implemented
-        // - Property BLoC
         // - Barter BLoC
         // - Messaging BLoC
         // - etc.
