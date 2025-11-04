@@ -242,4 +242,7 @@ class DateRangeModel extends DateRange {
       'end_date': endDate.toIso8601String(),
     };
   }
+
+  /// Convert to DateRange entity
+  DateRange toEntity() => this;
 }

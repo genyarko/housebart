@@ -67,9 +67,45 @@ class PropertyRepositoryImpl implements PropertyRepository {
   @override
   Future<Either<Failure, Property>> updateProperty({
     required String propertyId,
-    required Map<String, dynamic> updates,
+    String? title,
+    String? description,
+    String? address,
+    String? city,
+    String? stateProvince,
+    String? country,
+    String? postalCode,
+    double? latitude,
+    double? longitude,
+    String? propertyType,
+    int? maxGuests,
+    int? bedrooms,
+    int? bathrooms,
+    int? areaSqft,
+    List<String>? amenities,
+    List<String>? houseRules,
+    bool? isActive,
   }) async {
     try {
+      // Build updates map from provided parameters
+      final updates = <String, dynamic>{};
+      if (title != null) updates['title'] = title;
+      if (description != null) updates['description'] = description;
+      if (address != null) updates['address'] = address;
+      if (city != null) updates['city'] = city;
+      if (stateProvince != null) updates['state_province'] = stateProvince;
+      if (country != null) updates['country'] = country;
+      if (postalCode != null) updates['postal_code'] = postalCode;
+      if (latitude != null) updates['latitude'] = latitude;
+      if (longitude != null) updates['longitude'] = longitude;
+      if (propertyType != null) updates['property_type'] = propertyType;
+      if (maxGuests != null) updates['max_guests'] = maxGuests;
+      if (bedrooms != null) updates['bedrooms'] = bedrooms;
+      if (bathrooms != null) updates['bathrooms'] = bathrooms;
+      if (areaSqft != null) updates['area_sqft'] = areaSqft;
+      if (amenities != null) updates['amenities'] = amenities;
+      if (houseRules != null) updates['house_rules'] = houseRules;
+      if (isActive != null) updates['is_active'] = isActive;
+
       final propertyModel = await remoteDataSource.updateProperty(
         propertyId: propertyId,
         updates: updates,
@@ -167,6 +203,9 @@ class PropertyRepositoryImpl implements PropertyRepository {
     String? country,
     String? propertyType,
     int? minGuests,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? amenities,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -176,6 +215,9 @@ class PropertyRepositoryImpl implements PropertyRepository {
         country: country,
         propertyType: propertyType,
         minGuests: minGuests,
+        startDate: startDate,
+        endDate: endDate,
+        amenities: amenities,
         limit: limit,
         offset: offset,
       );
@@ -288,6 +330,30 @@ class PropertyRepositoryImpl implements PropertyRepository {
     } catch (e) {
       return Left(
           ServerFailure('Failed to add availability: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> removeAvailability({
+    required String propertyId,
+    required String availabilityId,
+  }) async {
+    try {
+      await remoteDataSource.removeAvailability(
+        propertyId: propertyId,
+        availabilityId: availabilityId,
+      );
+
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } on NotFoundException catch (e) {
+      return Left(NotFoundFailure(e.message));
+    } catch (e) {
+      return Left(
+          ServerFailure('Failed to remove availability: ${e.toString()}'));
     }
   }
 

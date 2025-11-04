@@ -212,6 +212,28 @@ class Validators {
     return null;
   }
 
+  /// Validate city
+  static String? validateCity(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'City is required';
+    }
+    if (value.trim().length < 2) {
+      return 'City name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  /// Validate country
+  static String? validateCountry(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Country is required';
+    }
+    if (value.trim().length < 2) {
+      return 'Country name must be at least 2 characters';
+    }
+    return null;
+  }
+
   /// Validate review
   static String? validateReview(String? value) {
     if (value == null || value.isEmpty) {

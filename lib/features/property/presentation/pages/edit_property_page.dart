@@ -129,6 +129,7 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                 AuthTextField(
                   controller: _titleController,
                   label: 'Property Title',
+                  hint: 'Beautiful apartment in downtown',
                   validator: Validators.validatePropertyTitle,
                 ),
                 const SizedBox(height: 16),

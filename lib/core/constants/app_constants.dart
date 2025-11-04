@@ -72,6 +72,11 @@ class AppConstants {
   static const Duration mediumAnimationDuration = Duration(milliseconds: 300);
   static const Duration longAnimationDuration = Duration(milliseconds: 500);
 
+  // Border Radius
+  static const double borderRadiusSmall = 8.0;
+  static const double borderRadiusMedium = 12.0;
+  static const double borderRadiusLarge = 16.0;
+
   // Debounce Durations
   static const Duration searchDebounce = Duration(milliseconds: 500);
   static const Duration typingDebounce = Duration(milliseconds: 300);

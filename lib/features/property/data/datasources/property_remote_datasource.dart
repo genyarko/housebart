@@ -25,7 +25,7 @@ abstract class PropertyRemoteDataSource {
 
   Future<PropertyModel> updateProperty({
     required String propertyId,
-    Map<String, dynamic> updates,
+    required Map<String, dynamic> updates,
   });
 
   Future<void> deleteProperty(String propertyId);
@@ -44,6 +44,9 @@ abstract class PropertyRemoteDataSource {
     String? country,
     String? propertyType,
     int? minGuests,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? amenities,
     int limit = 20,
     int offset = 0,
   });
@@ -69,6 +72,11 @@ abstract class PropertyRemoteDataSource {
     required String propertyId,
     required DateTime startDate,
     required DateTime endDate,
+  });
+
+  Future<void> removeAvailability({
+    required String propertyId,
+    required String availabilityId,
   });
 
   Future<List<DateRangeModel>> getPropertyAvailability(String propertyId);
@@ -130,7 +138,7 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
   @override
   Future<PropertyModel> updateProperty({
     required String propertyId,
-    Map<String, dynamic> updates,
+    required Map<String, dynamic> updates,
   }) async {
     try {
       final propertyData = await propertyService.updateProperty(
@@ -196,6 +204,9 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
     String? country,
     String? propertyType,
     int? minGuests,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? amenities,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -205,6 +216,9 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
         country: country,
         propertyType: propertyType,
         minGuests: minGuests,
+        startDate: startDate,
+        endDate: endDate,
+        amenities: amenities,
         limit: limit,
         offset: offset,
       );
@@ -281,6 +295,21 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
         propertyId: propertyId,
         startDate: startDate,
         endDate: endDate,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> removeAvailability({
+    required String propertyId,
+    required String availabilityId,
+  }) async {
+    try {
+      await propertyService.removeAvailability(
+        propertyId: propertyId,
+        availabilityId: availabilityId,
       );
     } catch (e) {
       rethrow;

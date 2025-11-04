@@ -141,7 +141,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                   controller: _addressController,
                   label: 'Street Address',
                   hint: '123 Main Street',
-                  validator: Validators.validateRequired,
+                  validator: (value) => Validators.validateRequired(value, 'Street Address'),
                 ),
                 const SizedBox(height: 16),
 
@@ -152,6 +152,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                       child: AuthTextField(
                         controller: _cityController,
                         label: 'City',
+                        hint: 'New York',
                         validator: Validators.validateCity,
                       ),
                     ),
@@ -160,6 +161,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                       child: AuthTextField(
                         controller: _stateController,
                         label: 'State/Province',
+                        hint: 'NY',
                       ),
                     ),
                   ],
@@ -173,6 +175,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                       child: AuthTextField(
                         controller: _countryController,
                         label: 'Country',
+                        hint: 'United States',
                         validator: Validators.validateCountry,
                       ),
                     ),
@@ -181,6 +184,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                       child: AuthTextField(
                         controller: _postalCodeController,
                         label: 'Postal Code',
+                        hint: '10001',
                       ),
                     ),
                   ],

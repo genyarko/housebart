@@ -67,7 +67,7 @@ class PropertyService {
   /// Update a property
   Future<Map<String, dynamic>> updateProperty({
     required String propertyId,
-    Map<String, dynamic> updates,
+    required Map<String, dynamic> updates,
   }) async {
     try {
       final response = await _client
@@ -163,6 +163,9 @@ class PropertyService {
     String? country,
     String? propertyType,
     int? minGuests,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String>? amenities,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -185,6 +188,14 @@ class PropertyService {
       if (minGuests != null) {
         query = query.gte('max_guests', minGuests);
       }
+
+      if (amenities != null && amenities.isNotEmpty) {
+        query = query.contains('amenities', amenities);
+      }
+
+      // Note: Date filtering would require joining with availability table
+      // For now, we'll filter on the property side only
+      // You may need to implement a custom RPC function for complex date queries
 
       final response =
           await query.order('created_at', ascending: false).range(offset, offset + limit - 1);
@@ -323,6 +334,24 @@ class PropertyService {
       throw ServerException(e.message, e.code);
     } catch (e) {
       throw ServerException('Failed to add availability: ${e.toString()}');
+    }
+  }
+
+  /// Remove availability dates for property
+  Future<void> removeAvailability({
+    required String propertyId,
+    required String availabilityId,
+  }) async {
+    try {
+      await _client
+          .from(ApiRoutes.propertyAvailabilityTable)
+          .delete()
+          .eq('id', availabilityId)
+          .eq('property_id', propertyId);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to remove availability: ${e.toString()}');
     }
   }
 
