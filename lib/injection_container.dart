@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/auth_service.dart';
 import 'services/realtime_service.dart';
 import 'services/property_service.dart';
+import 'services/barter_service.dart';
 
 // Features - Auth
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -31,6 +32,19 @@ import 'features/property/domain/usecases/delete_property_usecase.dart';
 import 'features/property/domain/usecases/upload_property_images_usecase.dart';
 import 'features/property/presentation/bloc/property_bloc.dart';
 
+// Features - Matching/Barter
+import 'features/matching/data/datasources/matching_remote_datasource.dart';
+import 'features/matching/data/repositories/matching_repository_impl.dart';
+import 'features/matching/domain/repositories/matching_repository.dart';
+import 'features/matching/domain/usecases/create_barter_request_usecase.dart';
+import 'features/matching/domain/usecases/accept_barter_usecase.dart';
+import 'features/matching/domain/usecases/reject_barter_usecase.dart';
+import 'features/matching/domain/usecases/cancel_barter_usecase.dart';
+import 'features/matching/domain/usecases/get_my_requests_usecase.dart';
+import 'features/matching/domain/usecases/get_received_requests_usecase.dart';
+import 'features/matching/domain/usecases/find_matches_usecase.dart';
+import 'features/matching/presentation/bloc/matching_bloc.dart';
+
 // Global service locator instance
 final sl = GetIt.instance;
 
@@ -42,6 +56,9 @@ Future<void> init() async {
 
   //! Features - Property
   _initProperty();
+
+  //! Features - Matching/Barter
+  _initMatching();
 
   //! Core Services
   await _initCore();
@@ -124,14 +141,52 @@ void _initProperty() {
   );
 }
 
+/// Initialize matching/barter feature dependencies
+void _initMatching() {
+  // Bloc
+  sl.registerFactory(
+    () => MatchingBloc(
+      createBarterRequestUseCase: sl(),
+      acceptBarterUseCase: sl(),
+      rejectBarterUseCase: sl(),
+      cancelBarterUseCase: sl(),
+      getMyRequestsUseCase: sl(),
+      getReceivedRequestsUseCase: sl(),
+      matchingRepository: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => CreateBarterRequestUseCase(sl()));
+  sl.registerLazySingleton(() => AcceptBarterUseCase(sl()));
+  sl.registerLazySingleton(() => RejectBarterUseCase(sl()));
+  sl.registerLazySingleton(() => CancelBarterUseCase(sl()));
+  sl.registerLazySingleton(() => GetMyRequestsUseCase(sl()));
+  sl.registerLazySingleton(() => GetReceivedRequestsUseCase(sl()));
+  sl.registerLazySingleton(() => FindMatchesUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<MatchingRepository>(
+    () => MatchingRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<MatchingRemoteDataSource>(
+    () => MatchingRemoteDataSourceImpl(barterService: sl()),
+  );
+}
+
 /// Initialize core services
 Future<void> _initCore() async {
   // Supabase services
   sl.registerLazySingleton(() => AuthService());
   sl.registerLazySingleton(() => RealtimeService());
   sl.registerLazySingleton(() => PropertyService());
+  sl.registerLazySingleton(() => BarterService());
 
-  // Note: Barter, Messaging, and other services will be added here as they're implemented
+  // Note: Messaging and other services will be added here as they're implemented
 }
 
 /// Initialize external dependencies
