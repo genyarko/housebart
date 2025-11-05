@@ -189,8 +189,8 @@ class _SavedPropertiesPageState extends State<SavedPropertiesPage> {
                           onTap: () {
                             context.push('${AppRoutes.propertyDetails}/${property.id}');
                           },
-                          isSaved: true,
-                          onSaveToggle: () {
+                          isFavorite: true,
+                          onFavorite: () {
                             context.read<SavedPropertyBloc>().add(
                                   ToggleSaveProperty(propertyId: property.id),
                                 );

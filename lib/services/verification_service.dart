@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/api_routes.dart';
 import '../core/errors/exceptions.dart';
@@ -170,7 +172,7 @@ class VerificationService {
       // Upload file to Supabase Storage
       await _client.storage
           .from(ApiRoutes.verificationDocsBucket)
-          .upload(fileName, filePath);
+          .upload(fileName, filePath as File);
 
       // Get public URL
       final url = _client.storage

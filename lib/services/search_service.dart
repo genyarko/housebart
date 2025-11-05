@@ -29,7 +29,7 @@ class SearchService {
     int offset = 0,
   }) async {
     try {
-      var query = _client
+      dynamic query = _client
           .from(ApiRoutes.propertiesTable)
           .select('''
             *,

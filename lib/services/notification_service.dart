@@ -42,11 +42,12 @@ class NotificationService {
 
       final response = await _client
           .from(ApiRoutes.notificationsTable)
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id')
           .eq('user_id', currentUserId)
-          .eq('is_read', false);
+          .eq('is_read', false)
+          .count();
 
-      return response.count ?? 0;
+      return response.count;
     } on PostgrestException catch (e) {
       throw ServerException(e.message, e.code);
     } catch (e) {

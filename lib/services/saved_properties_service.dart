@@ -144,10 +144,11 @@ class SavedPropertiesService {
 
       final response = await _client
           .from(ApiRoutes.savedPropertiesTable)
-          .select('id', const FetchOptions(count: CountOption.exact))
-          .eq('user_id', currentUserId);
+          .select('id')
+          .eq('user_id', currentUserId)
+          .count();
 
-      return response.count ?? 0;
+      return response.count;
     } on PostgrestException catch (e) {
       throw ServerException(e.message, e.code);
     } catch (e) {
