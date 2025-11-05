@@ -9,6 +9,7 @@ import '../features/main/presentation/pages/main_page.dart';
 import '../features/property/presentation/pages/properties_list_page.dart';
 import '../features/property/presentation/pages/property_details_page.dart';
 import '../features/property/presentation/pages/add_property_page.dart';
+import '../features/property/presentation/pages/edit_property_page.dart';
 import '../features/property/presentation/pages/my_properties_page.dart';
 import '../features/messaging/presentation/pages/conversations_page.dart';
 import '../features/messaging/presentation/pages/chat_page.dart';
@@ -65,6 +66,18 @@ class AppRouter {
         path: AppRoutes.addProperty,
         name: 'addProperty',
         builder: (context, state) => const AddPropertyPage(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.propertyDetails}/:id/edit',
+        name: 'editProperty',
+        builder: (context, state) {
+          final property = state.extra;
+          if (property == null) {
+            // If no property is passed, redirect to home
+            return const MainPage();
+          }
+          return EditPropertyPage(property: property as dynamic);
+        },
       ),
       GoRoute(
         path: '${AppRoutes.propertyDetails}/:id',
