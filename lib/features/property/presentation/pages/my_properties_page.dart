@@ -19,6 +19,9 @@ class MyPropertiesPage extends StatefulWidget {
 }
 
 class _MyPropertiesPageState extends State<MyPropertiesPage> {
+  // Cache the properties list so it persists even when bloc state changes
+  List<dynamic> _cachedProperties = [];
+
   @override
   void initState() {
     super.initState();
@@ -86,24 +89,33 @@ class _MyPropertiesPageState extends State<MyPropertiesPage> {
           }
         },
         builder: (context, state) {
-          if (state is PropertyLoading) {
+          // Update cache when we get a properties list
+          if (state is PropertiesLoaded) {
+            _cachedProperties = state.properties;
+          }
+
+          // Show loading only if we don't have cached data
+          if (state is PropertyLoading && _cachedProperties.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state is PropertiesEmpty) {
+          // If we explicitly have an empty state and no cache, show empty
+          if (state is PropertiesEmpty && _cachedProperties.isEmpty) {
             return _buildEmptyState();
           }
 
-          if (state is PropertiesLoaded) {
+          // Display cached properties regardless of current state
+          if (_cachedProperties.isNotEmpty) {
+            final properties = _cachedProperties;
             return RefreshIndicator(
               onRefresh: () async {
                 _loadUserProperties();
               },
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: state.properties.length,
+                itemCount: properties.length,
                 itemBuilder: (context, index) {
-                  final property = state.properties[index];
+                  final property = properties[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: _buildPropertyCard(property),

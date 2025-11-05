@@ -20,6 +20,11 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
+  // Cache the properties list so it persists even when bloc state changes
+  List<dynamic> _cachedProperties = [];
+  bool _hasError = false;
+  String _errorMessage = '';
+
   @override
   void initState() {
     super.initState();
@@ -95,11 +100,25 @@ class _ExplorePageState extends State<ExplorePage> {
               },
               child: BlocBuilder<PropertyBloc, PropertyState>(
                 builder: (context, state) {
-                if (state is PropertyLoading) {
+                // Update cache when we get a properties list
+                if (state is PropertiesLoaded) {
+                  _cachedProperties = state.properties;
+                  _hasError = false;
+                }
+
+                // Track error state
+                if (state is PropertyError) {
+                  _hasError = true;
+                  _errorMessage = state.message;
+                }
+
+                // Show loading only if we don't have cached data
+                if (state is PropertyLoading && _cachedProperties.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (state is PropertyError) {
+                // Show error only if we don't have cached data
+                if (_hasError && _cachedProperties.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -112,7 +131,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          state.message,
+                          _errorMessage,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
@@ -128,42 +147,9 @@ class _ExplorePageState extends State<ExplorePage> {
                   );
                 }
 
-                if (state is PropertiesLoaded) {
-                  if (state.properties.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.home_work_outlined,
-                            size: 80,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No properties yet',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Be the first to list your property!',
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[500],
-                                ),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: () => context.push(AppRoutes.addProperty),
-                            icon: const Icon(Icons.add),
-                            label: const Text('List Property'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                // Display cached properties regardless of current state
+                if (_cachedProperties.isNotEmpty) {
+                  final properties = _cachedProperties;
 
                   return CustomScrollView(
                     slivers: [
@@ -263,7 +249,7 @@ class _ExplorePageState extends State<ExplorePage> {
                             return SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
-                                  final property = state.properties[index];
+                                  final property = properties[index];
                                   final isFavorite = savedStatusCache[property.id] ?? false;
 
                                   return Padding(
@@ -282,7 +268,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                     ),
                                   );
                                 },
-                                childCount: state.properties.length,
+                                childCount: properties.length,
                               ),
                             );
                           },
