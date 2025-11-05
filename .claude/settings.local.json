@@ -20,7 +20,13 @@
       "Bash(mv:*)",
       "Bash(find:*)",
       "Bash(flutter clean:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(supabase --version:*)",
+      "Bash(supabase projects:*)",
+      "Bash(supabase link:*)",
+      "Bash(supabase db dump:*)",
+      "Bash(supabase db remote exec:*)",
+      "Bash(supabase status:*)"
     ],
     "deny": [],
     "ask": []
