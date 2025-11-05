@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../core/errors/exceptions.dart';
@@ -244,29 +246,57 @@ class PropertyService {
   Future<List<String>> uploadPropertyImages({
     required String propertyId,
     required List<String> imagePaths,
+    List<Uint8List>? imageBytes,
   }) async {
     try {
       final List<String> imageUrls = [];
 
       for (int i = 0; i < imagePaths.length; i++) {
         final imagePath = imagePaths[i];
-        final file = File(imagePath);
 
-        if (!await file.exists()) {
-          throw FileUploadException('File does not exist: $imagePath');
+        // Extract extension from the filename
+        String extension = 'jpg'; // default
+        if (imagePath.contains('.')) {
+          extension = imagePath.split('.').last.toLowerCase();
+        }
+
+        // Validate extension
+        if (!['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(extension)) {
+          // If extension is not recognized, try to detect from bytes
+          extension = 'jpg'; // fallback to jpg
         }
 
         // Generate unique filename
-        final extension = imagePath.split('.').last;
         final fileName = '$propertyId/${_uuid.v4()}.$extension';
 
-        // Upload to Supabase Storage
-        await _client.storage.from(ApiRoutes.propertyImagesBucket).upload(
+        // Get file bytes
+        Uint8List fileBytes;
+        if (imageBytes != null && i < imageBytes.length) {
+          // Use provided bytes (for web or when bytes are pre-loaded)
+          fileBytes = imageBytes[i];
+        } else if (kIsWeb) {
+          // On web, we should have bytes passed in
+          throw FileUploadException('Image bytes required for web platform');
+        } else {
+          // On mobile, read from file system
+          final file = File(imagePath);
+          if (!await file.exists()) {
+            throw FileUploadException('File does not exist: $imagePath');
+          }
+          fileBytes = await file.readAsBytes();
+        }
+
+        // Detect content type from bytes if possible
+        final contentType = _getContentType(extension, fileBytes);
+
+        // Upload to Supabase Storage using bytes
+        await _client.storage.from(ApiRoutes.propertyImagesBucket).uploadBinary(
               fileName,
-              file,
-              fileOptions: const FileOptions(
+              fileBytes,
+              fileOptions: FileOptions(
                 cacheControl: '3600',
                 upsert: false,
+                contentType: contentType,
               ),
             );
 
@@ -283,11 +313,18 @@ class PropertyService {
         });
 
         imageUrls.add(imageUrl);
+      }
 
-        // Update property images array
+      // Update property images array (if column exists)
+      // This is a denormalized cache - images are also in property_images table
+      try {
         await _client.from(ApiRoutes.propertiesTable).update({
           'images': imageUrls,
         }).eq('id', propertyId);
+      } catch (e) {
+        // If images column doesn't exist, just continue
+        // The images are still saved in property_images table
+        print('Note: Could not update images column in properties table: $e');
       }
 
       return imageUrls;
@@ -315,6 +352,26 @@ class PropertyService {
           .delete()
           .eq('property_id', propertyId)
           .eq('storage_path', storagePath);
+
+      // Update property images array to reflect deletion
+      try {
+        final remainingImages = await _client
+            .from(ApiRoutes.propertyImagesTable)
+            .select('image_url')
+            .eq('property_id', propertyId)
+            .order('order_index');
+
+        final imageUrls = (remainingImages as List)
+            .map((img) => img['image_url'] as String)
+            .toList();
+
+        await _client.from(ApiRoutes.propertiesTable).update({
+          'images': imageUrls,
+        }).eq('id', propertyId);
+      } catch (e) {
+        // If images column doesn't exist, just continue
+        print('Note: Could not update images column after deletion: $e');
+      }
     } on StorageException catch (e) {
       throw FileUploadException(e.message, e.statusCode);
     } on PostgrestException catch (e) {
@@ -405,87 +462,51 @@ class PropertyService {
     }
   }
 
-  /// Save property to favorites
-  Future<void> savePropertyToFavorites({
-    required String userId,
-    required String propertyId,
-  }) async {
-    try {
-      await _client.from('saved_properties').insert({
-        'user_id': userId,
-        'property_id': propertyId,
-      });
-    } on PostgrestException catch (e) {
-      // If it's a duplicate error, ignore it
-      if (e.code != '23505') {
-        throw ServerException(e.message, e.code);
-      }
-    } catch (e) {
-      throw ServerException('Failed to save property to favorites: ${e.toString()}');
-    }
-  }
-
-  /// Remove property from favorites
-  Future<void> removePropertyFromFavorites({
-    required String userId,
-    required String propertyId,
-  }) async {
-    try {
-      await _client
-          .from('saved_properties')
-          .delete()
-          .eq('user_id', userId)
-          .eq('property_id', propertyId);
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message, e.code);
-    } catch (e) {
-      throw ServerException('Failed to remove property from favorites: ${e.toString()}');
-    }
-  }
-
-  /// Get user's favorite properties
-  Future<List<Map<String, dynamic>>> getFavoriteProperties(String userId) async {
-    try {
-      final response = await _client
-          .from('saved_properties')
-          .select('property_id, properties(*)')
-          .eq('user_id', userId)
-          .order('created_at', ascending: false);
-
-      // Extract properties from the response
-      final List<Map<String, dynamic>> properties = [];
-      for (final item in response as List) {
-        if (item['properties'] != null) {
-          properties.add(item['properties'] as Map<String, dynamic>);
+  /// Get content type based on file extension and optionally detect from bytes
+  String _getContentType(String extension, [Uint8List? bytes]) {
+    // Try to detect from magic bytes first if available
+    if (bytes != null && bytes.length >= 4) {
+      // Check magic bytes for common image formats
+      if (bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) {
+        return 'image/jpeg';
+      } else if (bytes[0] == 0x89 &&
+          bytes[1] == 0x50 &&
+          bytes[2] == 0x4E &&
+          bytes[3] == 0x47) {
+        return 'image/png';
+      } else if (bytes[0] == 0x47 &&
+          bytes[1] == 0x49 &&
+          bytes[2] == 0x46) {
+        return 'image/gif';
+      } else if (bytes[0] == 0x52 &&
+          bytes[1] == 0x49 &&
+          bytes[2] == 0x46 &&
+          bytes[3] == 0x46) {
+        // RIFF format, could be WebP
+        if (bytes.length >= 12 &&
+            bytes[8] == 0x57 &&
+            bytes[9] == 0x45 &&
+            bytes[10] == 0x42 &&
+            bytes[11] == 0x50) {
+          return 'image/webp';
         }
       }
-
-      return properties;
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message, e.code);
-    } catch (e) {
-      throw ServerException('Failed to get favorite properties: ${e.toString()}');
     }
-  }
 
-  /// Check if property is favorited by user
-  Future<bool> isPropertyFavorited({
-    required String userId,
-    required String propertyId,
-  }) async {
-    try {
-      final response = await _client
-          .from('saved_properties')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('property_id', propertyId)
-          .maybeSingle();
-
-      return response != null;
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message, e.code);
-    } catch (e) {
-      throw ServerException('Failed to check favorite status: ${e.toString()}');
+    // Fall back to extension-based detection
+    switch (extension.toLowerCase()) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      default:
+        // Default to jpeg if we can't determine
+        return 'image/jpeg';
     }
   }
 }

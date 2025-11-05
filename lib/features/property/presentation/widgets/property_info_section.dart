@@ -74,12 +74,12 @@ class PropertyInfoSection extends StatelessWidget {
         const SizedBox(height: 24),
 
         // House rules (if any)
-        if (property.houseRules != null && property.houseRules!.isNotEmpty)
+        if (property.houseRules.isNotEmpty)
           _buildSection(
             title: 'House Rules',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: property.houseRules!.map((rule) {
+              children: property.houseRules.map((rule) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Row(

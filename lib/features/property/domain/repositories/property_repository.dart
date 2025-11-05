@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/property.dart';
@@ -14,8 +15,8 @@ abstract class PropertyRepository {
     String? stateProvince,
     required String country,
     String? postalCode,
-    required double latitude,
-    required double longitude,
+    double? latitude,
+    double? longitude,
     required String propertyType,
     required int maxGuests,
     required int bedrooms,
@@ -87,6 +88,7 @@ abstract class PropertyRepository {
   Future<Either<Failure, List<String>>> uploadPropertyImages({
     required String propertyId,
     required List<String> imagePaths,
+    List<Uint8List>? imageBytes,
   });
 
   /// Delete property image

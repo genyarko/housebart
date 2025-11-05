@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import '../../../../services/property_service.dart';
 import '../models/property_model.dart';
 
@@ -11,8 +12,8 @@ abstract class PropertyRemoteDataSource {
     String? stateProvince,
     required String country,
     String? postalCode,
-    required double latitude,
-    required double longitude,
+    double? latitude,
+    double? longitude,
     required String propertyType,
     required int maxGuests,
     required int bedrooms,
@@ -60,6 +61,7 @@ abstract class PropertyRemoteDataSource {
   Future<List<String>> uploadPropertyImages({
     required String propertyId,
     required List<String> imagePaths,
+    List<Uint8List>? imageBytes,
   });
 
   Future<void> deletePropertyImage({
@@ -115,8 +117,8 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
     String? stateProvince,
     required String country,
     String? postalCode,
-    required double latitude,
-    required double longitude,
+    double? latitude,
+    double? longitude,
     required String propertyType,
     required int maxGuests,
     required int bedrooms,
@@ -270,11 +272,13 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
   Future<List<String>> uploadPropertyImages({
     required String propertyId,
     required List<String> imagePaths,
+    List<Uint8List>? imageBytes,
   }) async {
     try {
       return await propertyService.uploadPropertyImages(
         propertyId: propertyId,
         imagePaths: imagePaths,
+        imageBytes: imageBytes,
       );
     } catch (e) {
       rethrow;

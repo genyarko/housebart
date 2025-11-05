@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../core/errors/failures.dart';
@@ -15,6 +16,7 @@ class UploadPropertyImagesUseCase {
     return await repository.uploadPropertyImages(
       propertyId: params.propertyId,
       imagePaths: params.imagePaths,
+      imageBytes: params.imageBytes,
     );
   }
 }
@@ -23,12 +25,14 @@ class UploadPropertyImagesUseCase {
 class UploadImagesParams extends Equatable {
   final String propertyId;
   final List<String> imagePaths;
+  final List<Uint8List>? imageBytes;
 
   const UploadImagesParams({
     required this.propertyId,
     required this.imagePaths,
+    this.imageBytes,
   });
 
   @override
-  List<Object> get props => [propertyId, imagePaths];
+  List<Object?> get props => [propertyId, imagePaths, imageBytes];
 }

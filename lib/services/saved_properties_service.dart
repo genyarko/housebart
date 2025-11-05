@@ -91,7 +91,7 @@ class SavedPropertiesService {
             created_at,
             property:property_id (
               id,
-              user_id,
+              owner_id,
               title,
               description,
               address,
@@ -104,13 +104,13 @@ class SavedPropertiesService {
               bathrooms,
               max_guests,
               amenities,
-              is_verified,
+              verification_status,
               is_active,
               created_at,
               property_images (
                 id,
                 image_url,
-                display_order
+                order_index
               )
             )
           ''')
