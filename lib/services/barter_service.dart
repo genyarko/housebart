@@ -155,6 +155,9 @@ class BarterService {
     int limit = 20,
     int offset = 0,
   }) async {
+    // Refresh session to ensure we have the current user
+    await _client.auth.refreshSession();
+
     final userId = currentUserId;
     if (userId == null) {
       throw Exception('User not authenticated');
@@ -182,6 +185,9 @@ class BarterService {
     int limit = 20,
     int offset = 0,
   }) async {
+    // Refresh session to ensure we have the current user
+    await _client.auth.refreshSession();
+
     final userId = currentUserId;
     if (userId == null) {
       throw Exception('User not authenticated');

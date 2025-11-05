@@ -8,8 +8,11 @@ import 'config/app_config.dart';
 import 'config/app_theme.dart';
 import 'config/router_config.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_state.dart' as auth_states;
 import 'features/property/presentation/bloc/property_bloc.dart';
+import 'features/property/presentation/bloc/property_event.dart';
 import 'features/matching/presentation/bloc/matching_bloc.dart';
+import 'features/matching/presentation/bloc/matching_event.dart';
 import 'features/messaging/presentation/bloc/messaging_bloc.dart';
 import 'features/verification/presentation/bloc/verification_bloc.dart';
 import 'features/notifications/presentation/bloc/notification_bloc.dart';
@@ -110,28 +113,43 @@ class HouseBartApp extends StatelessWidget {
         // - Reviews BLoC
         // - etc.
       ],
-      child: MaterialApp.router(
-        title: AppConfig.appName,
-        debugShowCheckedModeBanner: false,
+      child: BlocListener<AuthBloc, auth_states.AuthState>(
+        listener: (context, state) {
+          // Clear all bloc states when user logs out or changes
+          if (state is auth_states.AuthUnauthenticated || state is auth_states.AuthInitial) {
+            // Reset PropertyBloc
+            context.read<PropertyBloc>().add(PropertyStateReset());
 
-        // Theme
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
+            // Reset MatchingBloc
+            context.read<MatchingBloc>().add(MatchingResetStateEvent());
 
-        // Router
-        routerConfig: AppRouter.router,
-
-        // Locale
-        locale: const Locale('en', 'US'),
-        supportedLocales: const [
-          Locale('en', 'US'),
-        ],
-
-        // Builder for additional wrappers if needed
-        builder: (context, child) {
-          return child ?? const SizedBox.shrink();
+            // Reset other blocs if they have reset events
+            // You can add more resets here as needed
+          }
         },
+        child: MaterialApp.router(
+          title: AppConfig.appName,
+          debugShowCheckedModeBanner: false,
+
+          // Theme
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
+
+          // Router
+          routerConfig: AppRouter.router,
+
+          // Locale
+          locale: const Locale('en', 'US'),
+          supportedLocales: const [
+            Locale('en', 'US'),
+          ],
+
+          // Builder for additional wrappers if needed
+          builder: (context, child) {
+            return child ?? const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

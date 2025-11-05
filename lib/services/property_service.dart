@@ -152,6 +152,20 @@ class PropertyService {
   /// Get user's properties
   Future<List<Map<String, dynamic>>> getUserProperties(String userId) async {
     try {
+      // Refresh session to ensure we have the current user
+      await _client.auth.refreshSession();
+
+      // Verify the userId matches the current authenticated user
+      final currentUserId = _client.auth.currentUser?.id;
+      if (currentUserId == null) {
+        throw const AuthenticationException('User not authenticated');
+      }
+
+      // Security check: only allow fetching own properties
+      if (currentUserId != userId) {
+        throw const AuthenticationException('Cannot access other users\' properties');
+      }
+
       final response = await _client
           .from(ApiRoutes.propertiesTable)
           .select()

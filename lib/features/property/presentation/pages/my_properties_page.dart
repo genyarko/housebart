@@ -21,6 +21,7 @@ class MyPropertiesPage extends StatefulWidget {
 class _MyPropertiesPageState extends State<MyPropertiesPage> {
   // Cache the properties list so it persists even when bloc state changes
   List<dynamic> _cachedProperties = [];
+  String? _currentUserId;
 
   @override
   void initState() {
@@ -31,9 +32,19 @@ class _MyPropertiesPageState extends State<MyPropertiesPage> {
   void _loadUserProperties() {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
+      // Clear cache if user has changed
+      if (_currentUserId != null && _currentUserId != authState.user.id) {
+        _cachedProperties = [];
+      }
+      _currentUserId = authState.user.id;
+
       context.read<PropertyBloc>().add(
             UserPropertiesLoadRequested(authState.user.id),
           );
+    } else {
+      // Clear cache if user is not authenticated
+      _cachedProperties = [];
+      _currentUserId = null;
     }
   }
 
