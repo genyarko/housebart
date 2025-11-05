@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/api_routes.dart';
 import '../bloc/property_bloc.dart';
 import '../bloc/property_event.dart';
 import '../bloc/property_state.dart';
@@ -174,12 +175,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             return FloatingActionButton.extended(
               heroTag: 'property_details_page_fab',
               onPressed: () {
-                // TODO: Navigate to barter request page
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Barter request feature coming soon'),
-                  ),
-                );
+                context.push(AppRoutes.createBarter, extra: state.property);
               },
               icon: const Icon(Icons.swap_horiz),
               label: const Text('Request Barter'),
