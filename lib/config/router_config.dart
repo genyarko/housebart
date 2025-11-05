@@ -14,6 +14,7 @@ import '../features/messaging/presentation/pages/conversations_page.dart';
 import '../features/messaging/presentation/pages/chat_page.dart';
 import '../features/verification/presentation/pages/request_verification_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
+import '../features/saved_properties/presentation/pages/saved_properties_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -116,6 +117,13 @@ class AppRouter {
         path: AppRoutes.notifications,
         name: 'notifications',
         builder: (context, state) => const NotificationsPage(),
+      ),
+
+      // Saved Properties Routes
+      GoRoute(
+        path: AppRoutes.savedProperties,
+        name: 'savedProperties',
+        builder: (context, state) => const SavedPropertiesPage(),
       ),
 
       // TODO: Add more routes as features are implemented
