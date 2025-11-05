@@ -9,6 +9,8 @@ import 'services/property_service.dart';
 import 'services/barter_service.dart';
 import 'services/messaging_service.dart';
 import 'services/verification_service.dart';
+import 'services/notification_service.dart';
+import 'services/saved_properties_service.dart';
 
 // Features - Auth
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -69,6 +71,28 @@ import 'features/verification/domain/usecases/create_payment_intent_usecase.dart
 import 'features/verification/domain/usecases/confirm_payment_usecase.dart';
 import 'features/verification/presentation/bloc/verification_bloc.dart';
 
+// Features - Notifications
+import 'features/notifications/data/datasources/notification_remote_datasource.dart';
+import 'features/notifications/data/repositories/notification_repository_impl.dart';
+import 'features/notifications/domain/repositories/notification_repository.dart';
+import 'features/notifications/domain/usecases/get_notifications.dart';
+import 'features/notifications/domain/usecases/get_unread_count.dart';
+import 'features/notifications/domain/usecases/mark_as_read.dart';
+import 'features/notifications/domain/usecases/mark_all_as_read.dart';
+import 'features/notifications/domain/usecases/delete_notification.dart';
+import 'features/notifications/presentation/bloc/notification_bloc.dart';
+
+// Features - Saved Properties
+import 'features/saved_properties/data/datasources/saved_property_remote_datasource.dart';
+import 'features/saved_properties/data/repositories/saved_property_repository_impl.dart';
+import 'features/saved_properties/domain/repositories/saved_property_repository.dart';
+import 'features/saved_properties/domain/usecases/save_property.dart';
+import 'features/saved_properties/domain/usecases/unsave_property.dart';
+import 'features/saved_properties/domain/usecases/is_property_saved.dart';
+import 'features/saved_properties/domain/usecases/get_saved_properties.dart';
+import 'features/saved_properties/domain/usecases/get_saved_properties_count.dart';
+import 'features/saved_properties/presentation/bloc/saved_property_bloc.dart';
+
 // Global service locator instance
 final sl = GetIt.instance;
 
@@ -89,6 +113,12 @@ Future<void> init() async {
 
   //! Features - Verification
   _initVerification();
+
+  //! Features - Notifications
+  _initNotifications();
+
+  //! Features - Saved Properties
+  _initSavedProperties();
 
   //! Core Services
   await _initCore();
@@ -274,6 +304,72 @@ void _initVerification() {
   );
 }
 
+/// Initialize notifications feature dependencies
+void _initNotifications() {
+  // Bloc
+  sl.registerFactory(
+    () => NotificationBloc(
+      getNotifications: sl(),
+      getUnreadCount: sl(),
+      markAsRead: sl(),
+      markAllAsRead: sl(),
+      deleteNotification: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetNotifications(sl()));
+  sl.registerLazySingleton(() => GetUnreadCount(sl()));
+  sl.registerLazySingleton(() => MarkAsRead(sl()));
+  sl.registerLazySingleton(() => MarkAllAsRead(sl()));
+  sl.registerLazySingleton(() => DeleteNotification(sl()));
+
+  // Repository
+  sl.registerLazySingleton<NotificationRepository>(
+    () => NotificationRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<NotificationRemoteDataSource>(
+    () => NotificationRemoteDataSourceImpl(notificationService: sl()),
+  );
+}
+
+/// Initialize saved properties feature dependencies
+void _initSavedProperties() {
+  // Bloc
+  sl.registerFactory(
+    () => SavedPropertyBloc(
+      getSavedProperties: sl(),
+      getSavedPropertiesCount: sl(),
+      saveProperty: sl(),
+      unsaveProperty: sl(),
+      isPropertySaved: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetSavedProperties(sl()));
+  sl.registerLazySingleton(() => GetSavedPropertiesCount(sl()));
+  sl.registerLazySingleton(() => SaveProperty(sl()));
+  sl.registerLazySingleton(() => UnsaveProperty(sl()));
+  sl.registerLazySingleton(() => IsPropertySaved(sl()));
+
+  // Repository
+  sl.registerLazySingleton<SavedPropertyRepository>(
+    () => SavedPropertyRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<SavedPropertyRemoteDataSource>(
+    () => SavedPropertyRemoteDataSourceImpl(savedPropertiesService: sl()),
+  );
+}
+
 /// Initialize core services
 Future<void> _initCore() async {
   // Supabase services
@@ -283,6 +379,8 @@ Future<void> _initCore() async {
   sl.registerLazySingleton(() => BarterService());
   sl.registerLazySingleton(() => MessagingService());
   sl.registerLazySingleton(() => VerificationService());
+  sl.registerLazySingleton(() => NotificationService());
+  sl.registerLazySingleton(() => SavedPropertiesService());
 }
 
 /// Initialize external dependencies
