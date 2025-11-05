@@ -131,8 +131,8 @@ class PropertyLocation extends Equatable {
   final String? stateProvince;
   final String country;
   final String? postalCode;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
 
   const PropertyLocation({
     required this.address,
@@ -140,8 +140,8 @@ class PropertyLocation extends Equatable {
     this.stateProvince,
     required this.country,
     this.postalCode,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
   });
 
   /// Get full address

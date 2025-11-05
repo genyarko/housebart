@@ -162,8 +162,8 @@ class PropertyLocationModel extends PropertyLocation {
     super.stateProvince,
     required super.country,
     super.postalCode,
-    required super.latitude,
-    required super.longitude,
+    super.latitude,
+    super.longitude,
   });
 
   factory PropertyLocationModel.fromJson(Map<String, dynamic> json) {
@@ -173,8 +173,8 @@ class PropertyLocationModel extends PropertyLocation {
       stateProvince: json['state_province'] as String?,
       country: json['country'] as String,
       postalCode: json['postal_code'] as String?,
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
+      latitude: json['latitude'] != null ? (json['latitude'] as num).toDouble() : null,
+      longitude: json['longitude'] != null ? (json['longitude'] as num).toDouble() : null,
     );
   }
 

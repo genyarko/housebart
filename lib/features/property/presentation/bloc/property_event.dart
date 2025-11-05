@@ -53,8 +53,8 @@ class PropertyCreateRequested extends PropertyEvent {
   final String? stateProvince;
   final String country;
   final String? postalCode;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
   final String propertyType;
   final int maxGuests;
   final int bedrooms;
@@ -71,8 +71,8 @@ class PropertyCreateRequested extends PropertyEvent {
     this.stateProvince,
     required this.country,
     this.postalCode,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
     required this.propertyType,
     required this.maxGuests,
     required this.bedrooms,
