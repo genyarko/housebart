@@ -5,7 +5,7 @@ import '../features/auth/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
 import '../features/auth/presentation/pages/forgot_password_page.dart';
-import '../features/auth/presentation/pages/home_page.dart';
+import '../features/main/presentation/pages/main_page.dart';
 import '../features/property/presentation/pages/properties_list_page.dart';
 import '../features/property/presentation/pages/property_details_page.dart';
 import '../features/property/presentation/pages/add_property_page.dart';
@@ -49,7 +49,7 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.home,
         name: 'home',
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) => const MainPage(),
       ),
 
       // Property Routes
