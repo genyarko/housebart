@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import '../../../../config/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 
 /// Carousel widget for displaying property images
 class PropertyImageCarousel extends StatefulWidget {
@@ -22,6 +21,19 @@ class PropertyImageCarousel extends StatefulWidget {
 
 class _PropertyImageCarouselState extends State<PropertyImageCarousel> {
   int _currentIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,23 +43,21 @@ class _PropertyImageCarouselState extends State<PropertyImageCarousel> {
 
     return Stack(
       children: [
-        // Image carousel
-        CarouselSlider(
-          options: CarouselOptions(
-            height: widget.height,
-            viewportFraction: 1.0,
-            enableInfiniteScroll: widget.images.length > 1,
-            autoPlay: false,
-            enlargeCenterPage: false,
-            onPageChanged: (index, reason) {
+        // Image carousel using PageView
+        SizedBox(
+          height: widget.height,
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) {
               setState(() {
                 _currentIndex = index;
               });
             },
+            itemCount: widget.images.length,
+            itemBuilder: (context, index) {
+              return _buildImage(widget.images[index]);
+            },
           ),
-          items: widget.images.map((imageUrl) {
-            return _buildImage(imageUrl);
-          }).toList(),
         ),
 
         // Page indicators

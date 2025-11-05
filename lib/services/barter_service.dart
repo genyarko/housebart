@@ -120,8 +120,7 @@ class BarterService {
           'updated_at': DateTime.now().toIso8601String(),
         })
         .eq('id', requestId)
-        .eq('requester_id', userId) // Ensure only the requester can cancel
-        .execute();
+        .eq('requester_id', userId); // Ensure only the requester can cancel
   }
 
   /// Mark barter as completed
@@ -164,15 +163,16 @@ class BarterService {
     var query = _client
         .from(ApiRoutes.barterRequestsTable)
         .select()
-        .eq('requester_id', userId)
-        .order('created_at', ascending: false)
-        .range(offset, offset + limit - 1);
+        .eq('requester_id', userId);
 
     if (status != null) {
       query = query.eq('status', status);
     }
 
-    final response = await query;
+    final response = await query
+        .order('created_at', ascending: false)
+        .range(offset, offset + limit - 1);
+
     return List<Map<String, dynamic>>.from(response as List);
   }
 
@@ -190,15 +190,16 @@ class BarterService {
     var query = _client
         .from(ApiRoutes.barterRequestsTable)
         .select()
-        .eq('owner_id', userId)
-        .order('created_at', ascending: false)
-        .range(offset, offset + limit - 1);
+        .eq('owner_id', userId);
 
     if (status != null) {
       query = query.eq('status', status);
     }
 
-    final response = await query;
+    final response = await query
+        .order('created_at', ascending: false)
+        .range(offset, offset + limit - 1);
+
     return List<Map<String, dynamic>>.from(response as List);
   }
 
@@ -210,14 +211,13 @@ class BarterService {
     var query = _client
         .from(ApiRoutes.barterRequestsTable)
         .select()
-        .or('requester_property_id.eq.$propertyId,owner_property_id.eq.$propertyId')
-        .order('created_at', ascending: false);
+        .or('requester_property_id.eq.$propertyId,owner_property_id.eq.$propertyId');
 
     if (status != null) {
       query = query.eq('status', status);
     }
 
-    final response = await query;
+    final response = await query.order('created_at', ascending: false);
     return List<Map<String, dynamic>>.from(response as List);
   }
 
@@ -278,7 +278,7 @@ class BarterService {
         .eq('requester_id', userId)
         .eq('requester_property_id', requesterPropertyId)
         .eq('owner_property_id', ownerPropertyId)
-        .in_('status', ['pending', 'accepted']);
+        .inFilter('status', ['pending', 'accepted']);
 
     final requests = List<Map<String, dynamic>>.from(response as List);
     return requests.isNotEmpty;
@@ -292,36 +292,40 @@ class BarterService {
     }
 
     // Count sent requests
-    final sentCount = await _client
+    final sentCountResponse = await _client
         .from(ApiRoutes.barterRequestsTable)
-        .select('id', const FetchOptions(count: CountOption.exact))
-        .eq('requester_id', userId);
+        .select('id')
+        .eq('requester_id', userId)
+        .count();
 
     // Count received requests
-    final receivedCount = await _client
+    final receivedCountResponse = await _client
         .from(ApiRoutes.barterRequestsTable)
-        .select('id', const FetchOptions(count: CountOption.exact))
-        .eq('owner_id', userId);
+        .select('id')
+        .eq('owner_id', userId)
+        .count();
 
     // Count accepted requests
-    final acceptedCount = await _client
+    final acceptedCountResponse = await _client
         .from(ApiRoutes.barterRequestsTable)
-        .select('id', const FetchOptions(count: CountOption.exact))
+        .select('id')
         .eq('requester_id', userId)
-        .eq('status', 'accepted');
+        .eq('status', 'accepted')
+        .count();
 
     // Count completed barters
-    final completedCount = await _client
+    final completedCountResponse = await _client
         .from(ApiRoutes.barterRequestsTable)
-        .select('id', const FetchOptions(count: CountOption.exact))
+        .select('id')
         .eq('requester_id', userId)
-        .eq('status', 'completed');
+        .eq('status', 'completed')
+        .count();
 
     return {
-      'total_sent': sentCount.count,
-      'total_received': receivedCount.count,
-      'total_accepted': acceptedCount.count,
-      'total_completed': completedCount.count,
+      'total_sent': sentCountResponse.count,
+      'total_received': receivedCountResponse.count,
+      'total_accepted': acceptedCountResponse.count,
+      'total_completed': completedCountResponse.count,
     };
   }
 }

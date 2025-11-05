@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../config/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../auth/presentation/widgets/auth_text_field.dart';
@@ -129,6 +129,7 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                 AuthTextField(
                   controller: _titleController,
                   label: 'Property Title',
+                  hint: 'Beautiful apartment in downtown',
                   validator: Validators.validatePropertyTitle,
                 ),
                 const SizedBox(height: 16),

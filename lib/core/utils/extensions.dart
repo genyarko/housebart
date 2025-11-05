@@ -185,21 +185,22 @@ extension ContextExtension on BuildContext {
   }
 
   /// Navigate to route
-  Future<T?> push<T>(Widget page) {
+  Future<T?> pushPage<T>(Widget page) {
     return Navigator.of(this).push<T>(
       MaterialPageRoute(builder: (_) => page),
     );
   }
 
   /// Replace current route
-  Future<T?> pushReplacement<T>(Widget page) {
-    return Navigator.of(this).pushReplacement<T>(
+  Future<T?> pushReplacementPage<T, TO>(Widget page, {TO? result}) {
+    return Navigator.of(this).pushReplacement<T, TO>(
       MaterialPageRoute(builder: (_) => page),
+      result: result,
     );
   }
 
   /// Pop route
-  void pop<T>([T? result]) {
+  void popPage<T>([T? result]) {
     Navigator.of(this).pop(result);
   }
 

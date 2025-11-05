@@ -5,7 +5,21 @@
       "Bash(git init:*)",
       "Bash(git remote add:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter run:*)",
+      "Bash(echo:*)",
+      "Bash(assetsimages.gitkeep)",
+      "Bash(assetsicons.gitkeep)",
+      "Bash(assets/images/.gitkeep)",
+      "Bash(assets/icons/.gitkeep)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(dir:*)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "Bash(flutter clean:*)"
     ],
     "deny": [],
     "ask": []

@@ -218,13 +218,13 @@ class AuthService {
   }
 
   /// Sign in with Google (optional - requires configuration)
-  Future<AuthResponse> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     try {
-      final response = await _client.auth.signInWithOAuth(
+      await _client.auth.signInWithOAuth(
         OAuthProvider.google,
       );
 
-      return response;
+      return true;
     } on AuthException catch (e) {
       throw AuthenticationException(
         e.message,
@@ -239,13 +239,13 @@ class AuthService {
   }
 
   /// Sign in with Apple (optional - requires configuration)
-  Future<AuthResponse> signInWithApple() async {
+  Future<bool> signInWithApple() async {
     try {
-      final response = await _client.auth.signInWithOAuth(
+      await _client.auth.signInWithOAuth(
         OAuthProvider.apple,
       );
 
-      return response;
+      return true;
     } on AuthException catch (e) {
       throw AuthenticationException(
         e.message,

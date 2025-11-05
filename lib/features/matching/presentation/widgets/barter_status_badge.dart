@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../config/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/barter_request.dart';
 
 /// Widget to display barter request status as a badge

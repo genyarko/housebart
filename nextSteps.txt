@@ -389,13 +389,13 @@ IMMEDIATE NEXT STEPS FOR DEVELOPER
    - Test verification request flow
    - Test reviews submission
    - Test profile updates
+   - Test search and filters
+   - Test notifications
+   - Test saved properties
 
 5. UI ENHANCEMENTS (Optional)
    =========================
-   - Add property search and filters
    - Add map view for properties
-   - Add notifications page
-   - Add saved properties feature
    - Add verification payment pages
    - Add profile view pages
    - Add review submission pages
@@ -471,8 +471,8 @@ To view your work:
 2. Switch to branch: claude/flutter-app-architecture-011CUoRSWwSo3jccausPacxK
 3. Review the commits and code changes
 
-To merge into main (when ready):
-1. Create a Pull Request from your branch to main
+To merge into master (when ready):
+1. Create a Pull Request from your branch to master
 2. Review all changes
 3. Merge the PR
 

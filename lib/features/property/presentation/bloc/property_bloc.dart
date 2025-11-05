@@ -100,7 +100,9 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   ) async {
     emit(const PropertyLoading());
 
-    final result = await getPropertyByIdUseCase(event.propertyId);
+    final result = await getPropertyByIdUseCase(
+      PropertyIdParams(propertyId: event.propertyId),
+    );
 
     result.fold(
       (failure) => emit(PropertyError(failure.message)),
@@ -115,7 +117,9 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   ) async {
     emit(const PropertyLoading());
 
-    final result = await getUserPropertiesUseCase(event.userId);
+    final result = await getUserPropertiesUseCase(
+      UserIdParams(userId: event.userId),
+    );
 
     result.fold(
       (failure) => emit(PropertyError(failure.message)),
@@ -174,9 +178,26 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   ) async {
     emit(const PropertyLoading());
 
+    final updates = event.updates;
     final result = await propertyRepository.updateProperty(
       propertyId: event.propertyId,
-      updates: event.updates,
+      title: updates['title'] as String?,
+      description: updates['description'] as String?,
+      address: updates['address'] as String?,
+      city: updates['city'] as String?,
+      stateProvince: updates['state_province'] as String?,
+      country: updates['country'] as String?,
+      postalCode: updates['postal_code'] as String?,
+      latitude: updates['latitude'] as double?,
+      longitude: updates['longitude'] as double?,
+      propertyType: updates['property_type'] as String?,
+      maxGuests: updates['max_guests'] as int?,
+      bedrooms: updates['bedrooms'] as int?,
+      bathrooms: updates['bathrooms'] as int?,
+      areaSqft: updates['area_sqft'] as int?,
+      amenities: updates['amenities'] as List<String>?,
+      houseRules: updates['house_rules'] as List<String>?,
+      isActive: updates['is_active'] as bool?,
     );
 
     result.fold(
@@ -192,7 +213,9 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   ) async {
     emit(const PropertyLoading());
 
-    final result = await deletePropertyUseCase(event.propertyId);
+    final result = await deletePropertyUseCase(
+      PropertyIdParams(propertyId: event.propertyId),
+    );
 
     result.fold(
       (failure) => emit(PropertyError(failure.message)),
@@ -270,7 +293,7 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
     emit(const PropertyLoading());
 
     final result = await uploadPropertyImagesUseCase(
-      UploadPropertyImagesParams(
+      UploadImagesParams(
         propertyId: event.propertyId,
         imagePaths: event.imagePaths,
       ),

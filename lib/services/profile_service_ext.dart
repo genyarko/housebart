@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/api_routes.dart';
 import '../core/errors/exceptions.dart';
@@ -64,7 +66,7 @@ class ProfileService {
 
       await _client.storage
           .from(ApiRoutes.userAvatarsBucket)
-          .upload(fileName, filePath);
+          .upload(fileName, filePath as File);
 
       final url = _client.storage
           .from(ApiRoutes.userAvatarsBucket)
