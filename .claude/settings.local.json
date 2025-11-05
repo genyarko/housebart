@@ -14,7 +14,12 @@
       "Bash(assetsicons.gitkeep)",
       "Bash(assets/images/.gitkeep)",
       "Bash(assets/icons/.gitkeep)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(dir:*)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "Bash(flutter clean:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../config/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_routes.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';

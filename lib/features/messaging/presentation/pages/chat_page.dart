@@ -40,12 +40,12 @@ class _ChatPageState extends State<ChatPage> {
 
     // Load messages
     context.read<MessagingBloc>().add(
-          MessagingLoadMessagesEvent(barterId: widget.barterId),
+          MessagingLoadMessagesEvent(widget.barterId),
         );
 
     // Mark messages as read
     context.read<MessagingBloc>().add(
-          MessagingMarkAsReadEvent(barterId: widget.barterId),
+          MessagingMarkAsReadEvent(widget.barterId),
         );
 
     // Subscribe to real-time messages
@@ -74,16 +74,14 @@ class _ChatPageState extends State<ChatPage> {
           callback: (payload) {
             // Notify bloc of new message
             context.read<MessagingBloc>().add(
-                  MessagingNewMessageReceivedEvent(
-                    barterId: widget.barterId,
-                  ),
+                  MessagingNewMessageReceivedEvent(widget.barterId),
                 );
 
             // Mark as read if not own message
             final senderId = payload.newRecord['sender_id'] as String?;
             if (senderId != null && senderId != _currentUserId) {
               context.read<MessagingBloc>().add(
-                    MessagingMarkAsReadEvent(barterId: widget.barterId),
+                    MessagingMarkAsReadEvent(widget.barterId),
                   );
             }
           },
@@ -217,9 +215,7 @@ class _ChatPageState extends State<ChatPage> {
                         ElevatedButton.icon(
                           onPressed: () {
                             context.read<MessagingBloc>().add(
-                                  MessagingLoadMessagesEvent(
-                                    barterId: widget.barterId,
-                                  ),
+                                  MessagingLoadMessagesEvent(widget.barterId),
                                 );
                           },
                           icon: const Icon(Icons.refresh),

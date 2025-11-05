@@ -85,12 +85,13 @@ class MessagingService {
       // Get unread count
       final unreadResponse = await _client
           .from(ApiRoutes.messagesTable)
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id')
           .eq('barter_id', barterId)
           .eq('receiver_id', userId)
-          .eq('is_read', false);
+          .eq('is_read', false)
+          .count(CountOption.exact);
 
-      final unreadCount = unreadResponse.count ?? 0;
+      final unreadCount = unreadResponse.count;
 
       // Build conversation object
       conversations.add({
@@ -140,11 +141,12 @@ class MessagingService {
 
     final response = await _client
         .from(ApiRoutes.messagesTable)
-        .select('id', const FetchOptions(count: CountOption.exact))
+        .select('id')
         .eq('receiver_id', userId)
-        .eq('is_read', false);
+        .eq('is_read', false)
+        .count(CountOption.exact);
 
-    return response.count ?? 0;
+    return response.count;
   }
 
   /// Get a specific conversation
@@ -175,10 +177,11 @@ class MessagingService {
     // Get unread count
     final unreadResponse = await _client
         .from(ApiRoutes.messagesTable)
-        .select('id', const FetchOptions(count: CountOption.exact))
+        .select('id')
         .eq('barter_id', barterId)
         .eq('receiver_id', userId)
-        .eq('is_read', false);
+        .eq('is_read', false)
+        .count(CountOption.exact);
 
     return {
       'barter_id': barterId,

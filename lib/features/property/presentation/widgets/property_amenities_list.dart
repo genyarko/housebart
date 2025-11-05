@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../config/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 
 /// Widget to display property amenities with icons
