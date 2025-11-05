@@ -10,6 +10,7 @@ import 'config/router_config.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/property/presentation/bloc/property_bloc.dart';
 import 'features/matching/presentation/bloc/matching_bloc.dart';
+import 'features/messaging/presentation/bloc/messaging_bloc.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
@@ -76,8 +77,12 @@ class HouseBartApp extends StatelessWidget {
           create: (_) => di.sl<MatchingBloc>(),
         ),
 
+        // Messaging BLoC - available throughout the app
+        BlocProvider(
+          create: (_) => di.sl<MessagingBloc>(),
+        ),
+
         // TODO: Add more BLoCs as features are implemented
-        // - Messaging BLoC
         // - Reviews BLoC
         // - etc.
       ],

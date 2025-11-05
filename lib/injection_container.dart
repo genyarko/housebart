@@ -7,6 +7,7 @@ import 'services/auth_service.dart';
 import 'services/realtime_service.dart';
 import 'services/property_service.dart';
 import 'services/barter_service.dart';
+import 'services/messaging_service.dart';
 
 // Features - Auth
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -45,6 +46,16 @@ import 'features/matching/domain/usecases/get_received_requests_usecase.dart';
 import 'features/matching/domain/usecases/find_matches_usecase.dart';
 import 'features/matching/presentation/bloc/matching_bloc.dart';
 
+// Features - Messaging
+import 'features/messaging/data/datasources/messaging_remote_datasource.dart';
+import 'features/messaging/data/repositories/messaging_repository_impl.dart';
+import 'features/messaging/domain/repositories/messaging_repository.dart';
+import 'features/messaging/domain/usecases/send_message_usecase.dart';
+import 'features/messaging/domain/usecases/get_messages_usecase.dart';
+import 'features/messaging/domain/usecases/get_conversations_usecase.dart';
+import 'features/messaging/domain/usecases/mark_as_read_usecase.dart';
+import 'features/messaging/presentation/bloc/messaging_bloc.dart';
+
 // Global service locator instance
 final sl = GetIt.instance;
 
@@ -59,6 +70,9 @@ Future<void> init() async {
 
   //! Features - Matching/Barter
   _initMatching();
+
+  //! Features - Messaging
+  _initMessaging();
 
   //! Core Services
   await _initCore();
@@ -178,6 +192,37 @@ void _initMatching() {
   );
 }
 
+/// Initialize messaging feature dependencies
+void _initMessaging() {
+  // Bloc
+  sl.registerFactory(
+    () => MessagingBloc(
+      sendMessageUseCase: sl(),
+      getMessagesUseCase: sl(),
+      getConversationsUseCase: sl(),
+      markAsReadUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => SendMessageUseCase(sl()));
+  sl.registerLazySingleton(() => GetMessagesUseCase(sl()));
+  sl.registerLazySingleton(() => GetConversationsUseCase(sl()));
+  sl.registerLazySingleton(() => MarkAsReadUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<MessagingRepository>(
+    () => MessagingRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<MessagingRemoteDataSource>(
+    () => MessagingRemoteDataSourceImpl(messagingService: sl()),
+  );
+}
+
 /// Initialize core services
 Future<void> _initCore() async {
   // Supabase services
@@ -185,8 +230,7 @@ Future<void> _initCore() async {
   sl.registerLazySingleton(() => RealtimeService());
   sl.registerLazySingleton(() => PropertyService());
   sl.registerLazySingleton(() => BarterService());
-
-  // Note: Messaging and other services will be added here as they're implemented
+  sl.registerLazySingleton(() => MessagingService());
 }
 
 /// Initialize external dependencies
