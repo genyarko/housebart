@@ -17,6 +17,7 @@ import '../features/verification/presentation/pages/request_verification_page.da
 import '../features/notifications/presentation/pages/notifications_page.dart';
 import '../features/saved_properties/presentation/pages/saved_properties_page.dart';
 import '../features/search/presentation/pages/search_page.dart';
+import '../features/matching/presentation/pages/create_barter_request_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -149,8 +150,21 @@ class AppRouter {
         builder: (context, state) => const SearchPage(),
       ),
 
+      // Barter Routes
+      GoRoute(
+        path: AppRoutes.createBarter,
+        name: 'createBarter',
+        builder: (context, state) {
+          final targetProperty = state.extra;
+          if (targetProperty == null) {
+            // If no property is passed, redirect to home
+            return const MainPage();
+          }
+          return CreateBarterRequestPage(targetProperty: targetProperty as dynamic);
+        },
+      ),
+
       // TODO: Add more routes as features are implemented
-      // - Barter requests
       // - Profile
       // - etc.
     ],
