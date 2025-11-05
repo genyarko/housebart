@@ -1,4 +1,3 @@
-import '../../../../core/errors/exceptions.dart';
 import '../../../../services/property_service.dart';
 import '../models/property_model.dart';
 

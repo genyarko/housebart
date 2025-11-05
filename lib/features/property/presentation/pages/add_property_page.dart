@@ -34,7 +34,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   final _bathroomsController = TextEditingController();
   final _areaSqftController = TextEditingController();
 
-  String _selectedPropertyType = 'House';
+  String _selectedPropertyType = 'house';
   final List<String> _selectedAmenities = [];
   final List<String> _houseRules = [];
 

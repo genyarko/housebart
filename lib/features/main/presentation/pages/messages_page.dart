@@ -17,7 +17,9 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   void initState() {
     super.initState();
-    context.read<MessagingBloc>().add(GetConversationsEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MessagingBloc>().add(const MessagingLoadConversationsEvent());
+    });
   }
 
   @override
@@ -29,7 +31,7 @@ class _MessagesPageState extends State<MessagesPage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<MessagingBloc>().add(GetConversationsEvent());
+              context.read<MessagingBloc>().add(const MessagingLoadConversationsEvent());
             },
           ),
         ],
@@ -60,7 +62,7 @@ class _MessagesPageState extends State<MessagesPage> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<MessagingBloc>().add(GetConversationsEvent());
+                      context.read<MessagingBloc>().add(const MessagingLoadConversationsEvent());
                     },
                     child: const Text('Retry'),
                   ),
@@ -69,7 +71,7 @@ class _MessagesPageState extends State<MessagesPage> {
             );
           }
 
-          if (state is ConversationsLoaded) {
+          if (state is MessagingConversationsLoaded) {
             if (state.conversations.isEmpty) {
               return Center(
                 child: Column(
@@ -102,7 +104,7 @@ class _MessagesPageState extends State<MessagesPage> {
 
             return RefreshIndicator(
               onRefresh: () async {
-                context.read<MessagingBloc>().add(GetConversationsEvent());
+                context.read<MessagingBloc>().add(const MessagingLoadConversationsEvent());
               },
               child: ListView.builder(
                 itemCount: state.conversations.length,
@@ -134,7 +136,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       children: [
                         Expanded(
                           child: Text(
-                            conversation.otherUserName,
+                            conversation.otherUserName ?? 'Unknown User',
                             style: TextStyle(
                               fontWeight: conversation.unreadCount > 0
                                   ? FontWeight.bold
@@ -163,7 +165,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       ],
                     ),
                     subtitle: Text(
-                      conversation.lastMessage,
+                      conversation.lastMessage?.content ?? 'No messages yet',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -172,17 +174,19 @@ class _MessagesPageState extends State<MessagesPage> {
                             : FontWeight.normal,
                       ),
                     ),
-                    trailing: Text(
-                      timeago.format(conversation.lastMessageAt),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                    ),
+                    trailing: conversation.lastMessageAt != null
+                        ? Text(
+                            timeago.format(conversation.lastMessageAt!),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                          )
+                        : null,
                     onTap: () {
                       context.push(
                         '/messages/${conversation.barterId}?'
-                        'otherUserId=${conversation.otherUserId}&'
-                        'otherUserName=${Uri.encodeComponent(conversation.otherUserName)}'
+                        'otherUserId=${conversation.otherUserId ?? ''}&'
+                        'otherUserName=${Uri.encodeComponent(conversation.otherUserName ?? '')}'
                         '${conversation.otherUserAvatar != null ? '&otherUserAvatar=${Uri.encodeComponent(conversation.otherUserAvatar!)}' : ''}',
                       );
                     },

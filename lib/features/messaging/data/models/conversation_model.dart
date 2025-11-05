@@ -10,6 +10,9 @@ class ConversationModel extends Conversation {
     super.lastMessage,
     super.unreadCount,
     super.lastMessageAt,
+    super.otherUserId,
+    super.otherUserName,
+    super.otherUserAvatar,
   });
 
   /// Create ConversationModel from JSON
@@ -25,6 +28,9 @@ class ConversationModel extends Conversation {
       lastMessageAt: json['last_message_at'] != null
           ? DateTime.parse(json['last_message_at'] as String)
           : null,
+      otherUserId: json['other_user_id'] as String?,
+      otherUserName: json['other_user_name'] as String?,
+      otherUserAvatar: json['other_user_avatar'] as String?,
     );
   }
 
@@ -39,6 +45,9 @@ class ConversationModel extends Conversation {
           : null,
       'unread_count': unreadCount,
       'last_message_at': lastMessageAt?.toIso8601String(),
+      'other_user_id': otherUserId,
+      'other_user_name': otherUserName,
+      'other_user_avatar': otherUserAvatar,
     };
   }
 
@@ -51,6 +60,9 @@ class ConversationModel extends Conversation {
       lastMessage: lastMessage,
       unreadCount: unreadCount,
       lastMessageAt: lastMessageAt,
+      otherUserId: otherUserId,
+      otherUserName: otherUserName,
+      otherUserAvatar: otherUserAvatar,
     );
   }
 
@@ -63,6 +75,9 @@ class ConversationModel extends Conversation {
       lastMessage: entity.lastMessage,
       unreadCount: entity.unreadCount,
       lastMessageAt: entity.lastMessageAt,
+      otherUserId: entity.otherUserId,
+      otherUserName: entity.otherUserName,
+      otherUserAvatar: entity.otherUserAvatar,
     );
   }
 }

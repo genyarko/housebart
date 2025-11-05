@@ -9,6 +9,9 @@ class Conversation extends Equatable {
   final Message? lastMessage;
   final int unreadCount;
   final DateTime? lastMessageAt;
+  final String? otherUserId;
+  final String? otherUserName;
+  final String? otherUserAvatar;
 
   const Conversation({
     required this.barterId,
@@ -17,6 +20,9 @@ class Conversation extends Equatable {
     this.lastMessage,
     this.unreadCount = 0,
     this.lastMessageAt,
+    this.otherUserId,
+    this.otherUserName,
+    this.otherUserAvatar,
   });
 
   @override
@@ -27,6 +33,9 @@ class Conversation extends Equatable {
         lastMessage,
         unreadCount,
         lastMessageAt,
+        otherUserId,
+        otherUserName,
+        otherUserAvatar,
       ];
 
   /// Get the other user's ID given current user ID
@@ -45,6 +54,9 @@ class Conversation extends Equatable {
     Message? lastMessage,
     int? unreadCount,
     DateTime? lastMessageAt,
+    String? otherUserId,
+    String? otherUserName,
+    String? otherUserAvatar,
   }) {
     return Conversation(
       barterId: barterId ?? this.barterId,
@@ -53,6 +65,9 @@ class Conversation extends Equatable {
       lastMessage: lastMessage ?? this.lastMessage,
       unreadCount: unreadCount ?? this.unreadCount,
       lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+      otherUserId: otherUserId ?? this.otherUserId,
+      otherUserName: otherUserName ?? this.otherUserName,
+      otherUserAvatar: otherUserAvatar ?? this.otherUserAvatar,
     );
   }
 }

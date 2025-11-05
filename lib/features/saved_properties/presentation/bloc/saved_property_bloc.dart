@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../../../property/domain/entities/property.dart';
 import '../../domain/usecases/get_saved_properties.dart';
 import '../../domain/usecases/get_saved_properties_count.dart';
 import '../../domain/usecases/is_property_saved.dart';

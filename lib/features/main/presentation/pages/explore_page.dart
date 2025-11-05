@@ -21,7 +21,9 @@ class _ExplorePageState extends State<ExplorePage> {
   void initState() {
     super.initState();
     // Load properties when page loads
-    context.read<PropertyBloc>().add(GetPropertiesEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PropertyBloc>().add(const PropertyLoadRequested());
+    });
   }
 
   @override
@@ -55,7 +57,7 @@ class _ExplorePageState extends State<ExplorePage> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              context.read<PropertyBloc>().add(GetPropertiesEvent());
+              context.read<PropertyBloc>().add(const PropertyLoadRequested());
             },
             child: BlocBuilder<PropertyBloc, PropertyState>(
               builder: (context, state) {
@@ -83,7 +85,7 @@ class _ExplorePageState extends State<ExplorePage> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            context.read<PropertyBloc>().add(GetPropertiesEvent());
+                            context.read<PropertyBloc>().add(const PropertyLoadRequested());
                           },
                           child: const Text('Retry'),
                         ),
@@ -252,6 +254,7 @@ class _ExplorePageState extends State<ExplorePage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'explore_page_fab',
         onPressed: () => context.push(AppRoutes.addProperty),
         icon: const Icon(Icons.add),
         label: const Text('List Property'),

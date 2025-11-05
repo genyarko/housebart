@@ -153,6 +153,7 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'properties_list_page_fab',
         onPressed: () {
           context.push(AppRoutes.addProperty);
         },

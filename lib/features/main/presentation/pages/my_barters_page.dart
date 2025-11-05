@@ -25,8 +25,8 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
   }
 
   void _loadData() {
-    context.read<MatchingBloc>().add(GetMyRequestsEvent());
-    context.read<MatchingBloc>().add(GetReceivedRequestsEvent());
+    context.read<MatchingBloc>().add(const MatchingLoadMyRequestsEvent());
+    context.read<MatchingBloc>().add(const MatchingLoadReceivedRequestsEvent());
   }
 
   @override
@@ -62,6 +62,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'my_barters_page_fab',
         onPressed: () => context.push(AppRoutes.properties),
         icon: const Icon(Icons.swap_horiz),
         label: const Text('New Barter'),
@@ -96,7 +97,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    context.read<MatchingBloc>().add(GetMyRequestsEvent());
+                    context.read<MatchingBloc>().add(const MatchingLoadMyRequestsEvent());
                   },
                   child: const Text('Retry'),
                 ),
@@ -105,7 +106,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
           );
         }
 
-        if (state is MyRequestsLoaded) {
+        if (state is MatchingRequestsLoaded) {
           if (state.requests.isEmpty) {
             return Center(
               child: Column(
@@ -144,7 +145,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
 
           return RefreshIndicator(
             onRefresh: () async {
-              context.read<MatchingBloc>().add(GetMyRequestsEvent());
+              context.read<MatchingBloc>().add(const MatchingLoadMyRequestsEvent());
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -154,7 +155,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: BarterRequestCard(
-                    barterRequest: request,
+                    request: request,
                     onTap: () {
                       // TODO: Navigate to barter request details
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -176,7 +177,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                               onPressed: () {
                                 Navigator.pop(dialogContext);
                                 context.read<MatchingBloc>().add(
-                                      CancelBarterEvent(requestId: request.id),
+                                      MatchingCancelRequestEvent(request.id),
                                     );
                               },
                               child: const Text('Yes, Cancel'),
@@ -224,7 +225,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    context.read<MatchingBloc>().add(GetReceivedRequestsEvent());
+                    context.read<MatchingBloc>().add(const MatchingLoadReceivedRequestsEvent());
                   },
                   child: const Text('Retry'),
                 ),
@@ -233,7 +234,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
           );
         }
 
-        if (state is ReceivedRequestsLoaded) {
+        if (state is MatchingRequestsLoaded) {
           if (state.requests.isEmpty) {
             return Center(
               child: Column(
@@ -266,7 +267,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
 
           return RefreshIndicator(
             onRefresh: () async {
-              context.read<MatchingBloc>().add(GetReceivedRequestsEvent());
+              context.read<MatchingBloc>().add(const MatchingLoadReceivedRequestsEvent());
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -276,7 +277,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: BarterRequestCard(
-                    barterRequest: request,
+                    request: request,
                     isReceived: true,
                     onTap: () {
                       // TODO: Navigate to barter request details
@@ -299,7 +300,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                               onPressed: () {
                                 Navigator.pop(dialogContext);
                                 context.read<MatchingBloc>().add(
-                                      AcceptBarterEvent(requestId: request.id),
+                                      MatchingAcceptRequestEvent(request.id),
                                     );
                               },
                               child: const Text('Accept'),
@@ -339,8 +340,8 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                                 onPressed: () {
                                   Navigator.pop(dialogContext);
                                   context.read<MatchingBloc>().add(
-                                        RejectBarterEvent(
-                                          requestId: request.id,
+                                        MatchingRejectRequestEvent(
+                                          request.id,
                                           reason: reasonController.text.isEmpty
                                               ? null
                                               : reasonController.text,

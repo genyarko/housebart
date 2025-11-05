@@ -58,6 +58,13 @@ class AppRouter {
         name: 'properties',
         builder: (context, state) => const PropertiesListPage(),
       ),
+      // Note: addProperty must come BEFORE propertyDetails to avoid route conflict
+      // where "add" gets captured as an :id parameter
+      GoRoute(
+        path: AppRoutes.addProperty,
+        name: 'addProperty',
+        builder: (context, state) => const AddPropertyPage(),
+      ),
       GoRoute(
         path: '${AppRoutes.propertyDetails}/:id',
         name: 'propertyDetails',
@@ -65,11 +72,6 @@ class AppRouter {
           final propertyId = state.pathParameters['id']!;
           return PropertyDetailsPage(propertyId: propertyId);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.addProperty,
-        name: 'addProperty',
-        builder: (context, state) => const AddPropertyPage(),
       ),
       GoRoute(
         path: AppRoutes.myProperties,
