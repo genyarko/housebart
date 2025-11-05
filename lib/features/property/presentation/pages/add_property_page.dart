@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/validators.dart';
@@ -37,8 +39,11 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   String _selectedPropertyType = 'house';
   final List<String> _selectedAmenities = [];
   final List<String> _houseRules = [];
+  final List<String> _selectedImagePaths = [];
+  final ImagePicker _imagePicker = ImagePicker();
 
   bool _isLoading = false;
+  String? _createdPropertyId;
 
   @override
   void dispose() {
@@ -69,14 +74,35 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
           if (state is PropertyLoading) {
             setState(() => _isLoading = true);
           } else if (state is PropertyCreated) {
+            // Property created, now upload images if any
+            _createdPropertyId = state.property.id;
+            if (_selectedImagePaths.isNotEmpty) {
+              context.read<PropertyBloc>().add(
+                    PropertyImagesUploadRequested(
+                      propertyId: state.property.id,
+                      imagePaths: _selectedImagePaths,
+                    ),
+                  );
+            } else {
+              // No images to upload, just show success and close
+              setState(() => _isLoading = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Property created successfully!'),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+              context.pop(true);
+            }
+          } else if (state is PropertyImagesUploaded) {
             setState(() => _isLoading = false);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Property created successfully!'),
+              SnackBar(
+                content: Text('Property created with ${state.imageUrls.length} image(s)!'),
                 backgroundColor: AppColors.success,
               ),
             );
-            context.pop(true); // Return true to indicate success
+            context.pop(true);
           } else if (state is PropertyError) {
             setState(() => _isLoading = false);
             ScaffoldMessenger.of(context).showSnackBar(
@@ -365,6 +391,12 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                 _buildAmenitiesSelector(),
                 const SizedBox(height: 24),
 
+                // Images Section
+                _buildSectionTitle('Property Images'),
+                const SizedBox(height: 16),
+                _buildImageSelector(),
+                const SizedBox(height: 24),
+
                 // Submit Button
                 SizedBox(
                   width: double.infinity,
@@ -419,6 +451,136 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         );
       }).toList(),
     );
+  }
+
+  Widget _buildImageSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Selected images display
+        if (_selectedImagePaths.isNotEmpty)
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _selectedImagePaths.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          File(_selectedImagePaths[index]),
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedImagePaths.removeAt(index);
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: const EdgeInsets.all(4),
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        const SizedBox(height: 16),
+        // Image selection buttons
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _pickImageFromGallery,
+                icon: const Icon(Icons.photo_library),
+                label: const Text('Pick from Gallery'),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _pickImageFromCamera,
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('Take Photo'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _selectedImagePaths.isEmpty
+              ? 'No images selected (optional)'
+              : '${_selectedImagePaths.length} image(s) selected',
+          style: TextStyle(
+            fontSize: 12,
+            color: _selectedImagePaths.isEmpty
+                ? AppColors.textSecondary
+                : AppColors.primary,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final List<XFile> images = await _imagePicker.pickMultiImage();
+      if (images.isNotEmpty) {
+        setState(() {
+          _selectedImagePaths.addAll(images.map((image) => image.path));
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to pick images: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+      );
+      if (image != null) {
+        setState(() {
+          _selectedImagePaths.add(image.path);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to take photo: ${e.toString()}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   void _submitForm() {
