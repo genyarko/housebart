@@ -12,6 +12,7 @@ import '../features/property/presentation/pages/add_property_page.dart';
 import '../features/property/presentation/pages/my_properties_page.dart';
 import '../features/messaging/presentation/pages/conversations_page.dart';
 import '../features/messaging/presentation/pages/chat_page.dart';
+import '../features/verification/presentation/pages/request_verification_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -96,6 +97,16 @@ class AppRouter {
             otherUserName: otherUserName,
             otherUserAvatar: otherUserAvatar,
           );
+        },
+      ),
+
+      // Verification Routes
+      GoRoute(
+        path: '/verification/request/:propertyId',
+        name: 'requestVerification',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['propertyId']!;
+          return RequestVerificationPage(propertyId: propertyId);
         },
       ),
 
