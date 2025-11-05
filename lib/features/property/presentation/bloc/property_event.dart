@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 
 /// Base class for all property events
@@ -178,14 +179,16 @@ class PropertyNearbyRequested extends PropertyEvent {
 class PropertyImagesUploadRequested extends PropertyEvent {
   final String propertyId;
   final List<String> imagePaths;
+  final List<Uint8List>? imageBytes;
 
   const PropertyImagesUploadRequested({
     required this.propertyId,
     required this.imagePaths,
+    this.imageBytes,
   });
 
   @override
-  List<Object?> get props => [propertyId, imagePaths];
+  List<Object?> get props => [propertyId, imagePaths, imageBytes];
 }
 
 /// Event to delete a property image

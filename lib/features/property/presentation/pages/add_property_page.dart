@@ -1,12 +1,13 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/utils/image_helper.dart';
 import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../bloc/property_bloc.dart';
 import '../bloc/property_event.dart';
@@ -39,7 +40,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   String _selectedPropertyType = 'house';
   final List<String> _selectedAmenities = [];
   final List<String> _houseRules = [];
-  final List<String> _selectedImagePaths = [];
+  final List<XFile> _selectedImages = [];
   final ImagePicker _imagePicker = ImagePicker();
 
   bool _isLoading = false;
@@ -76,13 +77,9 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
           } else if (state is PropertyCreated) {
             // Property created, now upload images if any
             _createdPropertyId = state.property.id;
-            if (_selectedImagePaths.isNotEmpty) {
-              context.read<PropertyBloc>().add(
-                    PropertyImagesUploadRequested(
-                      propertyId: state.property.id,
-                      imagePaths: _selectedImagePaths,
-                    ),
-                  );
+            if (_selectedImages.isNotEmpty) {
+              // Read bytes from images for web compatibility
+              _uploadImagesForProperty(state.property.id);
             } else {
               // No images to upload, just show success and close
               setState(() => _isLoading = false);
@@ -458,12 +455,12 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Selected images display
-        if (_selectedImagePaths.isNotEmpty)
+        if (_selectedImages.isNotEmpty)
           SizedBox(
             height: 120,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: _selectedImagePaths.length,
+              itemCount: _selectedImages.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
@@ -471,12 +468,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          File(_selectedImagePaths[index]),
-                          width: 120,
-                          height: 120,
-                          fit: BoxFit.cover,
-                        ),
+                        child: _buildImagePreview(_selectedImages[index]),
                       ),
                       Positioned(
                         top: 4,
@@ -484,7 +476,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                         child: GestureDetector(
                           onTap: () {
                             setState(() {
-                              _selectedImagePaths.removeAt(index);
+                              _selectedImages.removeAt(index);
                             });
                           },
                           child: Container(
@@ -530,12 +522,12 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         ),
         const SizedBox(height: 8),
         Text(
-          _selectedImagePaths.isEmpty
+          _selectedImages.isEmpty
               ? 'No images selected (optional)'
-              : '${_selectedImagePaths.length} image(s) selected',
+              : '${_selectedImages.length} image(s) selected',
           style: TextStyle(
             fontSize: 12,
-            color: _selectedImagePaths.isEmpty
+            color: _selectedImages.isEmpty
                 ? AppColors.textSecondary
                 : AppColors.primary,
             fontStyle: FontStyle.italic,
@@ -545,12 +537,59 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
     );
   }
 
+  /// Build image preview that works on both web and mobile
+  Widget _buildImagePreview(XFile imageFile) {
+    return buildImagePreview(
+      imageFile,
+      width: 120,
+      height: 120,
+      fit: BoxFit.cover,
+    );
+  }
+
+  /// Upload images for a property (reads bytes for web compatibility)
+  Future<void> _uploadImagesForProperty(String propertyId) async {
+    try {
+      // Read bytes from all images and prepare file names
+      final List<Uint8List> imageBytesList = [];
+      final List<String> imageNames = [];
+
+      for (final xFile in _selectedImages) {
+        final bytes = await xFile.readAsBytes();
+        imageBytesList.add(bytes);
+        // Use the actual file name which has the correct extension
+        imageNames.add(xFile.name);
+      }
+
+      // Trigger upload with file names (not paths) and bytes
+      if (mounted) {
+        context.read<PropertyBloc>().add(
+              PropertyImagesUploadRequested(
+                propertyId: propertyId,
+                imagePaths: imageNames, // Using names instead of paths for extension
+                imageBytes: imageBytesList,
+              ),
+            );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to prepare images: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _pickImageFromGallery() async {
     try {
       final List<XFile> images = await _imagePicker.pickMultiImage();
       if (images.isNotEmpty) {
         setState(() {
-          _selectedImagePaths.addAll(images.map((image) => image.path));
+          _selectedImages.addAll(images);
         });
       }
     } catch (e) {
@@ -570,7 +609,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       );
       if (image != null) {
         setState(() {
-          _selectedImagePaths.add(image.path);
+          _selectedImages.add(image);
         });
       }
     } catch (e) {

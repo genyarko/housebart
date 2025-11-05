@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
@@ -264,11 +265,13 @@ class PropertyRepositoryImpl implements PropertyRepository {
   Future<Either<Failure, List<String>>> uploadPropertyImages({
     required String propertyId,
     required List<String> imagePaths,
+    List<Uint8List>? imageBytes,
   }) async {
     try {
       final imageUrls = await remoteDataSource.uploadPropertyImages(
         propertyId: propertyId,
         imagePaths: imagePaths,
+        imageBytes: imageBytes,
       );
 
       return Right(imageUrls);

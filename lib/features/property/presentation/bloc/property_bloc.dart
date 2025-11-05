@@ -296,6 +296,7 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
       UploadImagesParams(
         propertyId: event.propertyId,
         imagePaths: event.imagePaths,
+        imageBytes: event.imageBytes,
       ),
     );
 

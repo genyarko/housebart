@@ -1,0 +1,178 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.barter_requests (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  requester_id uuid NOT NULL,
+  offer_property_id uuid NOT NULL,
+  target_property_id uuid NOT NULL,
+  start_date date NOT NULL,
+  end_date date NOT NULL,
+  guest_count integer NOT NULL DEFAULT 1,
+  status USER-DEFINED DEFAULT 'pending'::barter_status,
+  message text,
+  rejection_reason text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  owner_id uuid,
+  CONSTRAINT barter_requests_pkey PRIMARY KEY (id),
+  CONSTRAINT barter_requests_requester_id_fkey FOREIGN KEY (requester_id) REFERENCES auth.users(id),
+  CONSTRAINT barter_requests_offer_property_id_fkey FOREIGN KEY (offer_property_id) REFERENCES public.properties(id),
+  CONSTRAINT barter_requests_target_property_id_fkey FOREIGN KEY (target_property_id) REFERENCES public.properties(id),
+  CONSTRAINT barter_requests_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.messages (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  barter_id uuid NOT NULL,
+  sender_id uuid NOT NULL,
+  content text NOT NULL,
+  is_read boolean DEFAULT false,
+  read_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT messages_pkey PRIMARY KEY (id),
+  CONSTRAINT messages_barter_request_id_fkey FOREIGN KEY (barter_id) REFERENCES public.barter_requests(id),
+  CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.notifications (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  title text NOT NULL,
+  message text NOT NULL,
+  type text NOT NULL,
+  related_id uuid,
+  is_read boolean DEFAULT false,
+  read_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT notifications_pkey PRIMARY KEY (id),
+  CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  email text NOT NULL UNIQUE,
+  first_name text,
+  last_name text,
+  phone text,
+  avatar_url text,
+  bio text,
+  role USER-DEFINED DEFAULT 'user'::user_role,
+  is_verified boolean DEFAULT false,
+  stripe_customer_id text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  full_name text,
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.properties (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  owner_id uuid NOT NULL,
+  title text NOT NULL,
+  description text,
+  address text NOT NULL,
+  city text NOT NULL,
+  state_province text,
+  country text NOT NULL,
+  postal_code text,
+  latitude numeric,
+  longitude numeric,
+  location USER-DEFINED,
+  property_type USER-DEFINED DEFAULT 'other'::property_type,
+  max_guests integer NOT NULL DEFAULT 2,
+  bedrooms integer NOT NULL DEFAULT 1,
+  bathrooms integer NOT NULL DEFAULT 1,
+  area_sqft integer,
+  amenities ARRAY DEFAULT '{}'::text[],
+  house_rules ARRAY DEFAULT '{}'::text[],
+  verification_status USER-DEFINED DEFAULT 'unverified'::verification_status,
+  average_rating numeric,
+  total_reviews integer DEFAULT 0,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  images ARRAY DEFAULT '{}'::text[],
+  CONSTRAINT properties_pkey PRIMARY KEY (id),
+  CONSTRAINT properties_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.property_availability (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  property_id uuid NOT NULL,
+  start_date date NOT NULL,
+  end_date date NOT NULL,
+  is_available boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT property_availability_pkey PRIMARY KEY (id),
+  CONSTRAINT property_availability_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id)
+);
+CREATE TABLE public.property_images (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  property_id uuid NOT NULL,
+  image_url text NOT NULL,
+  storage_path text NOT NULL,
+  caption text,
+  is_primary boolean DEFAULT false,
+  order_index integer DEFAULT 0,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT property_images_pkey PRIMARY KEY (id),
+  CONSTRAINT property_images_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id)
+);
+CREATE TABLE public.reviews (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  property_id uuid NOT NULL,
+  barter_request_id uuid NOT NULL,
+  reviewer_id uuid NOT NULL,
+  rating integer NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  cleanliness_rating integer CHECK (cleanliness_rating >= 1 AND cleanliness_rating <= 5),
+  accuracy_rating integer CHECK (accuracy_rating >= 1 AND accuracy_rating <= 5),
+  communication_rating integer CHECK (communication_rating >= 1 AND communication_rating <= 5),
+  location_rating integer CHECK (location_rating >= 1 AND location_rating <= 5),
+  value_rating integer CHECK (value_rating >= 1 AND value_rating <= 5),
+  comment text,
+  created_at timestamp with time zone DEFAULT now(),
+  reviewer_name text,
+  images ARRAY DEFAULT '{}'::text[],
+  CONSTRAINT reviews_pkey PRIMARY KEY (id),
+  CONSTRAINT reviews_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id),
+  CONSTRAINT reviews_barter_request_id_fkey FOREIGN KEY (barter_request_id) REFERENCES public.barter_requests(id),
+  CONSTRAINT reviews_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.saved_properties (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  property_id uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT saved_properties_pkey PRIMARY KEY (id),
+  CONSTRAINT saved_properties_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
+  CONSTRAINT saved_properties_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id)
+);
+CREATE TABLE public.spatial_ref_sys (
+  srid integer NOT NULL CHECK (srid > 0 AND srid <= 998999),
+  auth_name character varying,
+  auth_srid integer,
+  srtext character varying,
+  proj4text character varying,
+  CONSTRAINT spatial_ref_sys_pkey PRIMARY KEY (srid)
+);
+CREATE TABLE public.verification_requests (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  property_id uuid NOT NULL,
+  requester_id uuid NOT NULL,
+  verifier_id uuid,
+  payment_intent_id text,
+  payment_status USER-DEFINED DEFAULT 'pending'::payment_status,
+  amount numeric NOT NULL DEFAULT 49.99,
+  verification_notes text,
+  documents ARRAY DEFAULT '{}'::text[],
+  completed_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  status text DEFAULT 'pending'::text,
+  currency text DEFAULT 'USD'::text,
+  admin_notes text,
+  rejection_reason text,
+  expires_at timestamp with time zone,
+  document_url text,
+  CONSTRAINT verification_requests_pkey PRIMARY KEY (id),
+  CONSTRAINT verification_requests_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id),
+  CONSTRAINT verification_requests_requester_id_fkey FOREIGN KEY (requester_id) REFERENCES auth.users(id),
+  CONSTRAINT verification_requests_verifier_id_fkey FOREIGN KEY (verifier_id) REFERENCES auth.users(id)
+);
