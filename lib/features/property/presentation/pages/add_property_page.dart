@@ -198,20 +198,22 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                       child: TextFormField(
                         controller: _latitudeController,
                         decoration: const InputDecoration(
-                          labelText: 'Latitude',
+                          labelText: 'Latitude (Optional)',
                           border: OutlineInputBorder(),
+                          hintText: 'e.g., 53.079231',
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                           signed: true,
                         ),
                         validator: (value) {
+                          // Allow empty values
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            return null;
                           }
                           final lat = double.tryParse(value);
                           if (lat == null || lat < -90 || lat > 90) {
-                            return 'Invalid latitude';
+                            return 'Invalid latitude (-90 to 90)';
                           }
                           return null;
                         },
@@ -222,20 +224,22 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                       child: TextFormField(
                         controller: _longitudeController,
                         decoration: const InputDecoration(
-                          labelText: 'Longitude',
+                          labelText: 'Longitude (Optional)',
                           border: OutlineInputBorder(),
+                          hintText: 'e.g., 8.906081',
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                           signed: true,
                         ),
                         validator: (value) {
+                          // Allow empty values
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            return null;
                           }
                           final lng = double.tryParse(value);
                           if (lng == null || lng < -180 || lng > 180) {
-                            return 'Invalid longitude';
+                            return 'Invalid longitude (-180 to 180)';
                           }
                           return null;
                         },
@@ -245,7 +249,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tip: You can get coordinates from Google Maps',
+                  'Tip: Coordinates are optional and can be added later from Google Maps',
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -429,6 +433,12 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         return;
       }
 
+      // Parse optional coordinates
+      final latText = _latitudeController.text.trim();
+      final lngText = _longitudeController.text.trim();
+      final latitude = latText.isNotEmpty ? double.tryParse(latText) : null;
+      final longitude = lngText.isNotEmpty ? double.tryParse(lngText) : null;
+
       context.read<PropertyBloc>().add(
             PropertyCreateRequested(
               title: _titleController.text.trim(),
@@ -442,8 +452,8 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
               postalCode: _postalCodeController.text.trim().isNotEmpty
                   ? _postalCodeController.text.trim()
                   : null,
-              latitude: double.parse(_latitudeController.text.trim()),
-              longitude: double.parse(_longitudeController.text.trim()),
+              latitude: latitude,
+              longitude: longitude,
               propertyType: _selectedPropertyType,
               maxGuests: int.parse(_maxGuestsController.text.trim()),
               bedrooms: int.parse(_bedroomsController.text.trim()),

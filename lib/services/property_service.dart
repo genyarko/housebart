@@ -18,8 +18,8 @@ class PropertyService {
     String? stateProvince,
     required String country,
     String? postalCode,
-    required double latitude,
-    required double longitude,
+    double? latitude,
+    double? longitude,
     required String propertyType,
     required int maxGuests,
     required int bedrooms,
@@ -34,7 +34,8 @@ class PropertyService {
         throw const AuthenticationException('User not authenticated');
       }
 
-      final response = await _client.from(ApiRoutes.propertiesTable).insert({
+      // Build the data object with required fields
+      final Map<String, dynamic> data = {
         'owner_id': userId,
         'title': title,
         'description': description,
@@ -43,9 +44,6 @@ class PropertyService {
         'state_province': stateProvince,
         'country': country,
         'postal_code': postalCode,
-        'latitude': latitude,
-        'longitude': longitude,
-        'location': 'POINT($longitude $latitude)',
         'property_type': propertyType,
         'max_guests': maxGuests,
         'bedrooms': bedrooms,
@@ -54,7 +52,16 @@ class PropertyService {
         'amenities': amenities,
         'house_rules': houseRules ?? [],
         'is_active': true,
-      }).select().single();
+      };
+
+      // Add coordinates only if both are provided
+      if (latitude != null && longitude != null) {
+        data['latitude'] = latitude;
+        data['longitude'] = longitude;
+        data['location'] = 'POINT($longitude $latitude)';
+      }
+
+      final response = await _client.from(ApiRoutes.propertiesTable).insert(data).select().single();
 
       return response as Map<String, dynamic>;
     } on PostgrestException catch (e) {
