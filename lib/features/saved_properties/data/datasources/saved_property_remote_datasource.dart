@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../../../services/saved_properties_service.dart';
 import '../../../property/data/models/property_model.dart';
 
@@ -41,7 +42,21 @@ class SavedPropertyRemoteDataSourceImpl implements SavedPropertyRemoteDataSource
       limit: limit,
       offset: offset,
     );
-    return data.map((json) => PropertyModel.fromJson(json)).toList();
+
+    // Parse each property with error handling
+    final List<PropertyModel> properties = [];
+    for (var json in data) {
+      try {
+        properties.add(PropertyModel.fromJson(json));
+      } catch (e) {
+        debugPrint('Error parsing saved property: $e');
+        debugPrint('Property data: $json');
+        // Skip this property and continue
+        continue;
+      }
+    }
+
+    return properties;
   }
 
   @override

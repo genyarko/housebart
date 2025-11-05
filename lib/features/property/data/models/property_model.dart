@@ -24,10 +24,10 @@ class PropertyModel extends Property {
   /// Create PropertyModel from JSON
   factory PropertyModel.fromJson(Map<String, dynamic> json) {
     return PropertyModel(
-      id: json['id'] as String,
-      ownerId: json['owner_id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      ownerId: json['owner_id']?.toString() ?? '',
+      title: json['title']?.toString() ?? 'Untitled Property',
+      description: json['description']?.toString() ?? '',
       location: PropertyLocationModel.fromJson({
         'address': json['address'],
         'city': json['city'],
@@ -54,7 +54,7 @@ class PropertyModel extends Property {
           ? List<String>.from(json['house_rules'] as List)
           : [],
       verificationStatus: _parseVerificationStatus(
-        json['verification_status'] as String?,
+        json['verification_status']?.toString(),
       ),
       averageRating: json['average_rating'] != null
           ? (json['average_rating'] as num).toDouble()
@@ -62,8 +62,12 @@ class PropertyModel extends Property {
       totalReviews: json['total_reviews'] as int? ?? 0,
       isActive: json['is_active'] as bool? ?? true,
       availableDates: [], // Will be loaded separately
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : DateTime.now(),
     );
   }
 
@@ -168,11 +172,11 @@ class PropertyLocationModel extends PropertyLocation {
 
   factory PropertyLocationModel.fromJson(Map<String, dynamic> json) {
     return PropertyLocationModel(
-      address: json['address'] as String,
-      city: json['city'] as String,
-      stateProvince: json['state_province'] as String?,
-      country: json['country'] as String,
-      postalCode: json['postal_code'] as String?,
+      address: json['address']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      stateProvince: json['state_province']?.toString(),
+      country: json['country']?.toString() ?? '',
+      postalCode: json['postal_code']?.toString(),
       latitude: json['latitude'] != null ? (json['latitude'] as num).toDouble() : null,
       longitude: json['longitude'] != null ? (json['longitude'] as num).toDouble() : null,
     );
@@ -203,10 +207,10 @@ class PropertyDetailsModel extends PropertyDetails {
 
   factory PropertyDetailsModel.fromJson(Map<String, dynamic> json) {
     return PropertyDetailsModel(
-      propertyType: json['property_type'] as String,
-      maxGuests: json['max_guests'] as int,
-      bedrooms: json['bedrooms'] as int,
-      bathrooms: json['bathrooms'] as int,
+      propertyType: json['property_type']?.toString() ?? 'other',
+      maxGuests: json['max_guests'] as int? ?? 2,
+      bedrooms: json['bedrooms'] as int? ?? 1,
+      bathrooms: json['bathrooms'] as int? ?? 1,
       areaSqft: json['area_sqft'] as int?,
     );
   }

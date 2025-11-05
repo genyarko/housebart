@@ -462,6 +462,85 @@ class PropertyService {
     }
   }
 
+  /// Save property to favorites
+  Future<void> savePropertyToFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await _client.from(ApiRoutes.savedPropertiesTable).insert({
+        'user_id': userId,
+        'property_id': propertyId,
+      });
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to save property to favorites: ${e.toString()}');
+    }
+  }
+
+  /// Remove property from favorites
+  Future<void> removePropertyFromFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await _client
+          .from(ApiRoutes.savedPropertiesTable)
+          .delete()
+          .eq('user_id', userId)
+          .eq('property_id', propertyId);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to remove property from favorites: ${e.toString()}');
+    }
+  }
+
+  /// Get user's favorite properties
+  Future<List<Map<String, dynamic>>> getFavoriteProperties(String userId) async {
+    try {
+      final response = await _client
+          .from(ApiRoutes.savedPropertiesTable)
+          .select('property_id, ${ApiRoutes.propertiesTable}(*)')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      // Extract property data from the nested response
+      final properties = (response as List).map((item) {
+        final property = item['properties'] ?? item[ApiRoutes.propertiesTable];
+        return property as Map<String, dynamic>;
+      }).toList();
+
+      return properties;
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to get favorite properties: ${e.toString()}');
+    }
+  }
+
+  /// Check if property is favorited by user
+  Future<bool> isPropertyFavorited({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      final response = await _client
+          .from(ApiRoutes.savedPropertiesTable)
+          .select('id')
+          .eq('user_id', userId)
+          .eq('property_id', propertyId)
+          .maybeSingle();
+
+      return response != null;
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to check if property is favorited: ${e.toString()}');
+    }
+  }
+
   /// Get content type based on file extension and optionally detect from bytes
   String _getContentType(String extension, [Uint8List? bytes]) {
     // Try to detect from magic bytes first if available

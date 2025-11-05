@@ -11,6 +11,7 @@ import 'services/messaging_service.dart';
 import 'services/verification_service.dart';
 import 'services/notification_service.dart';
 import 'services/saved_properties_service.dart';
+import 'services/search_service.dart';
 
 // Features - Auth
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -34,6 +35,9 @@ import 'features/property/domain/usecases/get_property_by_id_usecase.dart';
 import 'features/property/domain/usecases/get_user_properties_usecase.dart';
 import 'features/property/domain/usecases/delete_property_usecase.dart';
 import 'features/property/domain/usecases/upload_property_images_usecase.dart';
+import 'features/property/domain/usecases/get_favorite_properties_usecase.dart';
+import 'features/property/domain/usecases/save_property_to_favorites_usecase.dart';
+import 'features/property/domain/usecases/remove_property_from_favorites_usecase.dart';
 import 'features/property/presentation/bloc/property_bloc.dart';
 
 // Features - Matching/Barter
@@ -93,6 +97,14 @@ import 'features/saved_properties/domain/usecases/get_saved_properties.dart';
 import 'features/saved_properties/domain/usecases/get_saved_properties_count.dart';
 import 'features/saved_properties/presentation/bloc/saved_property_bloc.dart';
 
+// Features - Search
+import 'features/search/data/datasources/search_remote_datasource.dart';
+import 'features/search/data/repositories/search_repository_impl.dart';
+import 'features/search/domain/repositories/search_repository.dart';
+import 'features/search/domain/usecases/search_properties_usecase.dart';
+import 'features/search/domain/usecases/get_search_suggestions_usecase.dart';
+import 'features/search/presentation/bloc/search_bloc.dart';
+
 // Global service locator instance
 final sl = GetIt.instance;
 
@@ -119,6 +131,9 @@ Future<void> init() async {
 
   //! Features - Saved Properties
   _initSavedProperties();
+
+  //! Features - Search
+  _initSearch();
 
   //! Core Services
   await _initCore();
@@ -176,6 +191,9 @@ void _initProperty() {
       getUserPropertiesUseCase: sl(),
       deletePropertyUseCase: sl(),
       uploadPropertyImagesUseCase: sl(),
+      getFavoritePropertiesUseCase: sl(),
+      savePropertyToFavoritesUseCase: sl(),
+      removePropertyFromFavoritesUseCase: sl(),
       propertyRepository: sl(),
     ),
   );
@@ -187,6 +205,9 @@ void _initProperty() {
   sl.registerLazySingleton(() => GetUserPropertiesUseCase(sl()));
   sl.registerLazySingleton(() => DeletePropertyUseCase(sl()));
   sl.registerLazySingleton(() => UploadPropertyImagesUseCase(sl()));
+  sl.registerLazySingleton(() => GetFavoritePropertiesUseCase(sl()));
+  sl.registerLazySingleton(() => SavePropertyToFavoritesUseCase(sl()));
+  sl.registerLazySingleton(() => RemovePropertyFromFavoritesUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<PropertyRepository>(
@@ -370,6 +391,33 @@ void _initSavedProperties() {
   );
 }
 
+/// Initialize search feature dependencies
+void _initSearch() {
+  // Bloc
+  sl.registerFactory(
+    () => SearchBloc(
+      searchPropertiesUseCase: sl(),
+      getSearchSuggestionsUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => SearchPropertiesUseCase(sl()));
+  sl.registerLazySingleton(() => GetSearchSuggestionsUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<SearchRepository>(
+    () => SearchRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<SearchRemoteDataSource>(
+    () => SearchRemoteDataSourceImpl(searchService: sl()),
+  );
+}
+
 /// Initialize core services
 Future<void> _initCore() async {
   // Supabase services
@@ -381,6 +429,7 @@ Future<void> _initCore() async {
   sl.registerLazySingleton(() => VerificationService());
   sl.registerLazySingleton(() => NotificationService());
   sl.registerLazySingleton(() => SavedPropertiesService());
+  sl.registerLazySingleton(() => SearchService());
 }
 
 /// Initialize external dependencies

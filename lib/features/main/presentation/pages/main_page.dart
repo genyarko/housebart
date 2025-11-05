@@ -19,13 +19,27 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
-  final List<Widget> _pages = const [
-    ExplorePage(),
-    MyBartersPage(),
-    MessagesPage(),
-    ProfilePage(),
+  final List<GlobalKey<State>> _pageKeys = [
+    GlobalKey<State>(),
+    GlobalKey<State>(),
+    GlobalKey<State>(),
+    GlobalKey<State>(),
   ];
+
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      ExplorePage(key: _pageKeys[0]),
+      MyBartersPage(key: _pageKeys[1]),
+      MessagesPage(key: _pageKeys[2]),
+      ProfilePage(key: _pageKeys[3]),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +58,22 @@ class _MainPageState extends State<MainPage> {
           selectedIndex: _currentIndex,
           onDestinationSelected: (index) {
             setState(() {
+              _previousIndex = _currentIndex;
               _currentIndex = index;
             });
+
+            // Notify the explore page to refresh when returning to it
+            if (index == 0 && _previousIndex != 0) {
+              final explorePageState = _pageKeys[0].currentState;
+              if (explorePageState != null) {
+                try {
+                  // Call refreshData method if it exists
+                  (explorePageState as dynamic).refreshData();
+                } catch (e) {
+                  // Silently ignore if method doesn't exist
+                }
+              }
+            }
           },
           destinations: const [
             NavigationDestination(

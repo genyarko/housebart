@@ -26,7 +26,8 @@
       "Bash(supabase link:*)",
       "Bash(supabase db dump:*)",
       "Bash(supabase db remote exec:*)",
-      "Bash(supabase status:*)"
+      "Bash(supabase status:*)",
+      "Bash(flutter build:*)"
     ],
     "deny": [],
     "ask": []

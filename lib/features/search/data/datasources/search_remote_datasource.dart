@@ -37,6 +37,9 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
     int limit = 20,
     int offset = 0,
   }) async {
+    // Map user-friendly sort values to actual database columns
+    String sortByColumn = _mapSortByToColumn(filters.sortBy);
+
     final results = await searchService.searchProperties(
       searchQuery: filters.searchQuery,
       city: filters.city,
@@ -53,13 +56,29 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
       latitude: filters.latitude,
       longitude: filters.longitude,
       radiusKm: filters.radiusKm,
-      sortBy: filters.sortBy,
+      sortBy: sortByColumn,
       sortAscending: filters.sortAscending,
       limit: limit,
       offset: offset,
     );
 
     return results.map((data) => PropertyModel.fromJson(data)).toList();
+  }
+
+  /// Map user-friendly sort values to actual database column names
+  String _mapSortByToColumn(String sortBy) {
+    switch (sortBy) {
+      case 'newest':
+        return 'created_at';
+      case 'size':
+        return 'area_sqft'; // Sort by property size
+      case 'rating':
+        return 'average_rating';
+      case 'distance':
+        return 'distance'; // Used in nearby searches
+      default:
+        return 'created_at'; // Default to newest
+    }
   }
 
   @override

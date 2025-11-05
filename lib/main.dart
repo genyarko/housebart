@@ -14,6 +14,7 @@ import 'features/messaging/presentation/bloc/messaging_bloc.dart';
 import 'features/verification/presentation/bloc/verification_bloc.dart';
 import 'features/notifications/presentation/bloc/notification_bloc.dart';
 import 'features/saved_properties/presentation/bloc/saved_property_bloc.dart';
+import 'features/search/presentation/bloc/search_bloc.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
@@ -98,6 +99,11 @@ class HouseBartApp extends StatelessWidget {
         // Saved Properties BLoC - available throughout the app
         BlocProvider(
           create: (_) => di.sl<SavedPropertyBloc>(),
+        ),
+
+        // Search BLoC - available throughout the app
+        BlocProvider(
+          create: (_) => di.sl<SearchBloc>(),
         ),
 
         // TODO: Add more BLoCs as features are implemented

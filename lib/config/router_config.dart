@@ -15,6 +15,7 @@ import '../features/messaging/presentation/pages/chat_page.dart';
 import '../features/verification/presentation/pages/request_verification_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
 import '../features/saved_properties/presentation/pages/saved_properties_page.dart';
+import '../features/search/presentation/pages/search_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -126,6 +127,13 @@ class AppRouter {
         path: AppRoutes.savedProperties,
         name: 'savedProperties',
         builder: (context, state) => const SavedPropertiesPage(),
+      ),
+
+      // Search Routes
+      GoRoute(
+        path: AppRoutes.search,
+        name: 'search',
+        builder: (context, state) => const SearchPage(),
       ),
 
       // TODO: Add more routes as features are implemented

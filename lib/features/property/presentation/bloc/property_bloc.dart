@@ -6,7 +6,7 @@ import '../../domain/usecases/get_properties_usecase.dart';
 import '../../domain/usecases/get_property_by_id_usecase.dart';
 import '../../domain/usecases/get_user_properties_usecase.dart';
 import '../../domain/usecases/upload_property_images_usecase.dart';
-import '../../domain/usecases/get_favorite_properties_usecase.dart';
+import '../../domain/usecases/get_favorite_properties_usecase.dart' as favorite_usecase;
 import '../../domain/usecases/save_property_to_favorites_usecase.dart';
 import '../../domain/usecases/remove_property_from_favorites_usecase.dart';
 import '../../domain/repositories/property_repository.dart';
@@ -21,7 +21,7 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   final GetUserPropertiesUseCase getUserPropertiesUseCase;
   final DeletePropertyUseCase deletePropertyUseCase;
   final UploadPropertyImagesUseCase uploadPropertyImagesUseCase;
-  final GetFavoritePropertiesUseCase getFavoritePropertiesUseCase;
+  final favorite_usecase.GetFavoritePropertiesUseCase getFavoritePropertiesUseCase;
   final SavePropertyToFavoritesUseCase savePropertyToFavoritesUseCase;
   final RemovePropertyFromFavoritesUseCase removePropertyFromFavoritesUseCase;
   final PropertyRepository propertyRepository;
@@ -468,7 +468,7 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
     }
 
     final result = await getFavoritePropertiesUseCase(
-      UserIdParams(userId: userId),
+      favorite_usecase.UserIdParams(userId: userId),
     );
 
     result.fold(

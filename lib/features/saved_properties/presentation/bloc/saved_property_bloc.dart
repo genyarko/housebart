@@ -52,7 +52,7 @@ class SavedPropertyBloc extends Bloc<SavedPropertyEvent, SavedPropertyState> {
         emit(SavedPropertyError(message: failure.message));
       },
       (properties) async {
-        final count = await countResult.fold(
+        final count = countResult.fold(
           (failure) => 0,
           (c) => c,
         );

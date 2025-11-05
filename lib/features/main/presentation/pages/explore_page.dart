@@ -8,6 +8,9 @@ import '../../../property/presentation/bloc/property_state.dart';
 import '../../../property/presentation/widgets/property_card.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../saved_properties/presentation/bloc/saved_property_bloc.dart';
+import '../../../saved_properties/presentation/bloc/saved_property_event.dart';
+import '../../../saved_properties/presentation/bloc/saved_property_state.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -20,10 +23,29 @@ class _ExplorePageState extends State<ExplorePage> {
   @override
   void initState() {
     super.initState();
-    // Load properties when page loads
+    // Load properties and saved properties when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PropertyBloc>().add(const PropertyLoadRequested());
+      _loadData();
     });
+  }
+
+  /// Load or reload property data
+  void _loadData() {
+    if (!mounted) return;
+    context.read<PropertyBloc>().add(const PropertyLoadRequested());
+
+    // Load saved properties - wrap in try-catch to handle errors gracefully
+    try {
+      context.read<SavedPropertyBloc>().add(const LoadSavedProperties());
+    } catch (e) {
+      // If saved properties fail to load, continue without them
+      debugPrint('Error loading saved properties: $e');
+    }
+  }
+
+  /// Public method to refresh data when page becomes visible
+  void refreshData() {
+    _loadData();
   }
 
   @override
@@ -35,10 +57,7 @@ class _ExplorePageState extends State<ExplorePage> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // TODO: Navigate to search page
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Search feature coming soon')),
-              );
+              context.push(AppRoutes.search);
             },
           ),
           IconButton(
@@ -49,18 +68,33 @@ class _ExplorePageState extends State<ExplorePage> {
           ),
         ],
       ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, authState) {
-          if (authState is! AuthAuthenticated) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocListener<SavedPropertyBloc, SavedPropertyState>(
+        listener: (context, savedState) {
+          if (savedState is SavedPropertyActionSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(savedState.message)),
+            );
+          } else if (savedState is SavedPropertyError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(savedState.message),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
+        },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, authState) {
+            if (authState is! AuthAuthenticated) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              context.read<PropertyBloc>().add(const PropertyLoadRequested());
-            },
-            child: BlocBuilder<PropertyBloc, PropertyState>(
-              builder: (context, state) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                _loadData();
+              },
+              child: BlocBuilder<PropertyBloc, PropertyState>(
+                builder: (context, state) {
                 if (state is PropertyLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -220,22 +254,38 @@ class _ExplorePageState extends State<ExplorePage> {
                       // Properties grid
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final property = state.properties[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: PropertyCard(
-                                  property: property,
-                                  onTap: () {
-                                    context.push('${AppRoutes.propertyDetails}/${property.id}');
-                                  },
-                                ),
-                              );
-                            },
-                            childCount: state.properties.length,
-                          ),
+                        sliver: BlocBuilder<SavedPropertyBloc, SavedPropertyState>(
+                          builder: (context, savedState) {
+                            final savedStatusCache = savedState is SavedPropertyLoaded
+                                ? savedState.savedStatusCache
+                                : <String, bool>{};
+
+                            return SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final property = state.properties[index];
+                                  final isFavorite = savedStatusCache[property.id] ?? false;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: PropertyCard(
+                                      property: property,
+                                      onTap: () {
+                                        context.push('${AppRoutes.propertyDetails}/${property.id}');
+                                      },
+                                      onFavorite: () {
+                                        context.read<SavedPropertyBloc>().add(
+                                              ToggleSaveProperty(propertyId: property.id),
+                                            );
+                                      },
+                                      isFavorite: isFavorite,
+                                    ),
+                                  );
+                                },
+                                childCount: state.properties.length,
+                              ),
+                            );
+                          },
                         ),
                       ),
 
@@ -247,11 +297,12 @@ class _ExplorePageState extends State<ExplorePage> {
                   );
                 }
 
-                return const SizedBox.shrink();
-              },
-            ),
-          );
-        },
+                  return const SizedBox.shrink();
+                },
+              ),
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'explore_page_fab',
