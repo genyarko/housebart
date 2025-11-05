@@ -1,10 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/usecases/create_property_usecase.dart';
 import '../../domain/usecases/delete_property_usecase.dart';
 import '../../domain/usecases/get_properties_usecase.dart';
 import '../../domain/usecases/get_property_by_id_usecase.dart';
 import '../../domain/usecases/get_user_properties_usecase.dart';
 import '../../domain/usecases/upload_property_images_usecase.dart';
+import '../../domain/usecases/get_favorite_properties_usecase.dart';
+import '../../domain/usecases/save_property_to_favorites_usecase.dart';
+import '../../domain/usecases/remove_property_from_favorites_usecase.dart';
 import '../../domain/repositories/property_repository.dart';
 import 'property_event.dart';
 import 'property_state.dart';
@@ -17,6 +21,9 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
   final GetUserPropertiesUseCase getUserPropertiesUseCase;
   final DeletePropertyUseCase deletePropertyUseCase;
   final UploadPropertyImagesUseCase uploadPropertyImagesUseCase;
+  final GetFavoritePropertiesUseCase getFavoritePropertiesUseCase;
+  final SavePropertyToFavoritesUseCase savePropertyToFavoritesUseCase;
+  final RemovePropertyFromFavoritesUseCase removePropertyFromFavoritesUseCase;
   final PropertyRepository propertyRepository;
 
   PropertyBloc({
@@ -26,6 +33,9 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
     required this.getUserPropertiesUseCase,
     required this.deletePropertyUseCase,
     required this.uploadPropertyImagesUseCase,
+    required this.getFavoritePropertiesUseCase,
+    required this.savePropertyToFavoritesUseCase,
+    required this.removePropertyFromFavoritesUseCase,
     required this.propertyRepository,
   }) : super(const PropertyInitial()) {
     on<PropertyLoadRequested>(_onPropertyLoadRequested);
@@ -40,6 +50,8 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
     on<PropertyImageDeleteRequested>(_onPropertyImageDeleteRequested);
     on<PropertyAvailabilityAddRequested>(_onPropertyAvailabilityAddRequested);
     on<PropertyStatusToggleRequested>(_onPropertyStatusToggleRequested);
+    on<PropertyFavoriteToggleRequested>(_onPropertyFavoriteToggleRequested);
+    on<FavoritePropertiesLoadRequested>(_onFavoritePropertiesLoadRequested);
     on<PropertyErrorCleared>(_onPropertyErrorCleared);
     on<PropertyStateReset>(_onPropertyStateReset);
   }
@@ -382,5 +394,92 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
     Emitter<PropertyState> emit,
   ) {
     emit(const PropertyInitial());
+  }
+
+  /// Handle toggling favorite status
+  Future<void> _onPropertyFavoriteToggleRequested(
+    PropertyFavoriteToggleRequested event,
+    Emitter<PropertyState> emit,
+  ) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      emit(const PropertyError('User not authenticated'));
+      return;
+    }
+
+    // Check current status
+    final checkResult = await propertyRepository.isPropertyFavorited(
+      userId: userId,
+      propertyId: event.propertyId,
+    );
+
+    await checkResult.fold(
+      (failure) async {
+        emit(PropertyError(failure.message));
+      },
+      (isFavorited) async {
+        // Toggle the favorite status
+        if (isFavorited) {
+          final result = await removePropertyFromFavoritesUseCase(
+            RemoveFromFavoritesParams(
+              userId: userId,
+              propertyId: event.propertyId,
+            ),
+          );
+
+          result.fold(
+            (failure) => emit(PropertyError(failure.message)),
+            (_) => emit(PropertyFavoriteToggled(
+              propertyId: event.propertyId,
+              isFavorited: false,
+            )),
+          );
+        } else {
+          final result = await savePropertyToFavoritesUseCase(
+            SaveToFavoritesParams(
+              userId: userId,
+              propertyId: event.propertyId,
+            ),
+          );
+
+          result.fold(
+            (failure) => emit(PropertyError(failure.message)),
+            (_) => emit(PropertyFavoriteToggled(
+              propertyId: event.propertyId,
+              isFavorited: true,
+            )),
+          );
+        }
+      },
+    );
+  }
+
+  /// Handle loading favorite properties
+  Future<void> _onFavoritePropertiesLoadRequested(
+    FavoritePropertiesLoadRequested event,
+    Emitter<PropertyState> emit,
+  ) async {
+    emit(const PropertyLoading());
+
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      emit(const PropertyError('User not authenticated'));
+      return;
+    }
+
+    final result = await getFavoritePropertiesUseCase(
+      UserIdParams(userId: userId),
+    );
+
+    result.fold(
+      (failure) => emit(PropertyError(failure.message)),
+      (properties) {
+        if (properties.isEmpty) {
+          emit(const PropertiesEmpty('No favorite properties yet'));
+        } else {
+          emit(FavoritePropertiesLoaded(properties));
+        }
+      },
+    );
   }
 }

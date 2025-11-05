@@ -400,4 +400,88 @@ class PropertyRepositoryImpl implements PropertyRepository {
           ServerFailure('Failed to toggle property status: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> savePropertyToFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await remoteDataSource.savePropertyToFavorites(
+        userId: userId,
+        propertyId: propertyId,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(
+          ServerFailure('Failed to save property to favorites: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> removePropertyFromFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await remoteDataSource.removePropertyFromFavorites(
+        userId: userId,
+        propertyId: propertyId,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(
+          ServerFailure('Failed to remove property from favorites: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Property>>> getFavoriteProperties(
+    String userId,
+  ) async {
+    try {
+      final propertyModels =
+          await remoteDataSource.getFavoriteProperties(userId);
+
+      final properties =
+          propertyModels.map((model) => model.toEntity()).toList();
+      return Right(properties);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(
+          ServerFailure('Failed to get favorite properties: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> isPropertyFavorited({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      final isFavorited = await remoteDataSource.isPropertyFavorited(
+        userId: userId,
+        propertyId: propertyId,
+      );
+      return Right(isFavorited);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(
+          ServerFailure('Failed to check favorite status: ${e.toString()}'));
+    }
+  }
 }
