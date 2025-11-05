@@ -28,12 +28,21 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _cityController;
+  late final TextEditingController _stateController;
+  late final TextEditingController _countryController;
+  late final TextEditingController _postalCodeController;
+  late final TextEditingController _latitudeController;
+  late final TextEditingController _longitudeController;
   late final TextEditingController _maxGuestsController;
   late final TextEditingController _bedroomsController;
   late final TextEditingController _bathroomsController;
+  late final TextEditingController _areaSqftController;
 
   late String _selectedPropertyType;
   late List<String> _selectedAmenities;
+  late List<String> _houseRules;
 
   bool _isLoading = false;
 
@@ -43,21 +52,44 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
     // Initialize controllers with current property values
     _titleController = TextEditingController(text: widget.property.title);
     _descriptionController = TextEditingController(text: widget.property.description);
+    _addressController = TextEditingController(text: widget.property.location.address);
+    _cityController = TextEditingController(text: widget.property.location.city);
+    _stateController = TextEditingController(text: widget.property.location.stateProvince ?? '');
+    _countryController = TextEditingController(text: widget.property.location.country);
+    _postalCodeController = TextEditingController(text: widget.property.location.postalCode ?? '');
+    _latitudeController = TextEditingController(
+      text: widget.property.location.latitude?.toString() ?? '',
+    );
+    _longitudeController = TextEditingController(
+      text: widget.property.location.longitude?.toString() ?? '',
+    );
     _maxGuestsController = TextEditingController(text: widget.property.details.maxGuests.toString());
     _bedroomsController = TextEditingController(text: widget.property.details.bedrooms.toString());
     _bathroomsController = TextEditingController(text: widget.property.details.bathrooms.toString());
+    _areaSqftController = TextEditingController(
+      text: widget.property.details.areaSqft?.toString() ?? '',
+    );
 
     _selectedPropertyType = widget.property.details.propertyType;
     _selectedAmenities = List.from(widget.property.amenities);
+    _houseRules = List.from(widget.property.houseRules);
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _addressController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
+    _countryController.dispose();
+    _postalCodeController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
     _maxGuestsController.dispose();
     _bedroomsController.dispose();
     _bathroomsController.dispose();
+    _areaSqftController.dispose();
     super.dispose();
   }
 
@@ -96,40 +128,14 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Note about editing
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.info.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.info),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline, color: AppColors.info),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'You can update property details, but location cannot be changed.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.info,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Basic Information
+                // Basic Information Section
                 _buildSectionTitle('Basic Information'),
                 const SizedBox(height: 16),
 
                 AuthTextField(
                   controller: _titleController,
                   label: 'Property Title',
-                  hint: 'Beautiful apartment in downtown',
+                  hint: 'e.g., Beautiful Beach House in Miami',
                   validator: Validators.validatePropertyTitle,
                 ),
                 const SizedBox(height: 16),
@@ -138,6 +144,7 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                   controller: _descriptionController,
                   decoration: const InputDecoration(
                     labelText: 'Description',
+                    hintText: 'Describe your property...',
                     border: OutlineInputBorder(),
                   ),
                   maxLines: 5,
@@ -161,7 +168,126 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Property Details
+                // Location Section
+                _buildSectionTitle('Location'),
+                const SizedBox(height: 16),
+
+                AuthTextField(
+                  controller: _addressController,
+                  label: 'Street Address',
+                  hint: '123 Main Street',
+                  validator: (value) => Validators.validateRequired(value, 'Street Address'),
+                ),
+                const SizedBox(height: 16),
+
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: AuthTextField(
+                        controller: _cityController,
+                        label: 'City',
+                        hint: 'New York',
+                        validator: Validators.validateCity,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AuthTextField(
+                        controller: _stateController,
+                        label: 'State/Province',
+                        hint: 'NY',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: AuthTextField(
+                        controller: _countryController,
+                        label: 'Country',
+                        hint: 'United States',
+                        validator: Validators.validateCountry,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AuthTextField(
+                        controller: _postalCodeController,
+                        label: 'Postal Code',
+                        hint: '10001',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Coordinates
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _latitudeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Latitude (Optional)',
+                          border: OutlineInputBorder(),
+                          hintText: 'e.g., 53.079231',
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: true,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return null;
+                          final lat = double.tryParse(value);
+                          if (lat == null || lat < -90 || lat > 90) {
+                            return 'Invalid latitude (-90 to 90)';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _longitudeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Longitude (Optional)',
+                          border: OutlineInputBorder(),
+                          hintText: 'e.g., 8.906081',
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: true,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return null;
+                          final lng = double.tryParse(value);
+                          if (lng == null || lng < -180 || lng > 180) {
+                            return 'Invalid longitude (-180 to 180)';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tip: Coordinates are optional and can be added later from Google Maps',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Property Details Section
                 _buildSectionTitle('Property Details'),
                 const SizedBox(height: 16),
 
@@ -196,6 +322,8 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         validator: (value) {
                           if (value == null || value.isEmpty) return 'Required';
+                          final bedrooms = int.tryParse(value);
+                          if (bedrooms == null || bedrooms < 0) return 'Invalid';
                           return null;
                         },
                       ),
@@ -204,24 +332,43 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                 ),
                 const SizedBox(height: 16),
 
-                TextFormField(
-                  controller: _bathroomsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Bathrooms',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return 'Required';
-                    final bathrooms = int.tryParse(value);
-                    if (bathrooms == null || bathrooms < 1) return 'Min 1';
-                    return null;
-                  },
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _bathroomsController,
+                        decoration: const InputDecoration(
+                          labelText: 'Bathrooms',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Required';
+                          final bathrooms = int.tryParse(value);
+                          if (bathrooms == null || bathrooms < 1) return 'Min 1';
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _areaSqftController,
+                        decoration: const InputDecoration(
+                          labelText: 'Area (sq ft)',
+                          border: OutlineInputBorder(),
+                          hintText: 'Optional',
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
 
-                // Amenities
+                // Amenities Section
                 _buildSectionTitle('Amenities'),
                 const SizedBox(height: 16),
                 _buildAmenitiesSelector(),
@@ -295,16 +442,36 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
         return;
       }
 
-      // Build updates map with only changed fields
+      // Parse optional coordinates
+      final latText = _latitudeController.text.trim();
+      final lngText = _longitudeController.text.trim();
+      final latitude = latText.isNotEmpty ? double.tryParse(latText) : null;
+      final longitude = lngText.isNotEmpty ? double.tryParse(lngText) : null;
+
+      // Build updates map
       final updates = <String, dynamic>{
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
+        'address': _addressController.text.trim(),
+        'city': _cityController.text.trim(),
+        'state_province': _stateController.text.trim().isNotEmpty
+            ? _stateController.text.trim()
+            : null,
+        'country': _countryController.text.trim(),
+        'postal_code': _postalCodeController.text.trim().isNotEmpty
+            ? _postalCodeController.text.trim()
+            : null,
+        'latitude': latitude,
+        'longitude': longitude,
         'property_type': _selectedPropertyType,
         'max_guests': int.parse(_maxGuestsController.text.trim()),
         'bedrooms': int.parse(_bedroomsController.text.trim()),
         'bathrooms': int.parse(_bathroomsController.text.trim()),
+        'area_sqft': _areaSqftController.text.trim().isNotEmpty
+            ? int.parse(_areaSqftController.text.trim())
+            : null,
         'amenities': _selectedAmenities,
-        'updated_at': DateTime.now().toIso8601String(),
+        'house_rules': _houseRules.isNotEmpty ? _houseRules : null,
       };
 
       context.read<PropertyBloc>().add(

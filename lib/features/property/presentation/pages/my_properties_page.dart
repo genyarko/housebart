@@ -169,13 +169,15 @@ class _MyPropertiesPageState extends State<MyPropertiesPage> {
                 children: [
                   // Edit button
                   TextButton.icon(
-                    onPressed: () {
-                      // TODO: Navigate to edit page
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Edit feature coming soon'),
-                        ),
+                    onPressed: () async {
+                      final result = await context.push(
+                        '${AppRoutes.propertyDetails}/${property.id}/edit',
+                        extra: property,
                       );
+                      // Reload properties if changes were made
+                      if (result == true) {
+                        _loadUserProperties();
+                      }
                     },
                     icon: const Icon(Icons.edit, size: 18),
                     label: const Text('Edit'),
