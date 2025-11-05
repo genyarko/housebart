@@ -404,4 +404,88 @@ class PropertyService {
       throw ServerException('Failed to toggle property status: ${e.toString()}');
     }
   }
+
+  /// Save property to favorites
+  Future<void> savePropertyToFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await _client.from('saved_properties').insert({
+        'user_id': userId,
+        'property_id': propertyId,
+      });
+    } on PostgrestException catch (e) {
+      // If it's a duplicate error, ignore it
+      if (e.code != '23505') {
+        throw ServerException(e.message, e.code);
+      }
+    } catch (e) {
+      throw ServerException('Failed to save property to favorites: ${e.toString()}');
+    }
+  }
+
+  /// Remove property from favorites
+  Future<void> removePropertyFromFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await _client
+          .from('saved_properties')
+          .delete()
+          .eq('user_id', userId)
+          .eq('property_id', propertyId);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to remove property from favorites: ${e.toString()}');
+    }
+  }
+
+  /// Get user's favorite properties
+  Future<List<Map<String, dynamic>>> getFavoriteProperties(String userId) async {
+    try {
+      final response = await _client
+          .from('saved_properties')
+          .select('property_id, properties(*)')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      // Extract properties from the response
+      final List<Map<String, dynamic>> properties = [];
+      for (final item in response as List) {
+        if (item['properties'] != null) {
+          properties.add(item['properties'] as Map<String, dynamic>);
+        }
+      }
+
+      return properties;
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to get favorite properties: ${e.toString()}');
+    }
+  }
+
+  /// Check if property is favorited by user
+  Future<bool> isPropertyFavorited({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      final response = await _client
+          .from('saved_properties')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('property_id', propertyId)
+          .maybeSingle();
+
+      return response != null;
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to check favorite status: ${e.toString()}');
+    }
+  }
 }

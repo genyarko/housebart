@@ -237,3 +237,18 @@ class PropertyErrorCleared extends PropertyEvent {
 class PropertyStateReset extends PropertyEvent {
   const PropertyStateReset();
 }
+
+/// Event to toggle favorite status
+class PropertyFavoriteToggleRequested extends PropertyEvent {
+  final String propertyId;
+
+  const PropertyFavoriteToggleRequested(this.propertyId);
+
+  @override
+  List<Object?> get props => [propertyId];
+}
+
+/// Event to load favorite properties
+class FavoritePropertiesLoadRequested extends PropertyEvent {
+  const FavoritePropertiesLoadRequested();
+}

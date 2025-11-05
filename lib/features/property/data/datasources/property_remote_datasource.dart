@@ -81,6 +81,23 @@ abstract class PropertyRemoteDataSource {
   Future<List<DateRangeModel>> getPropertyAvailability(String propertyId);
 
   Future<PropertyModel> togglePropertyStatus(String propertyId);
+
+  Future<void> savePropertyToFavorites({
+    required String userId,
+    required String propertyId,
+  });
+
+  Future<void> removePropertyFromFavorites({
+    required String userId,
+    required String propertyId,
+  });
+
+  Future<List<PropertyModel>> getFavoriteProperties(String userId);
+
+  Future<bool> isPropertyFavorited({
+    required String userId,
+    required String propertyId,
+  });
 }
 
 /// Implementation of property remote data source using PropertyService
@@ -337,6 +354,62 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
       final propertyData =
           await propertyService.togglePropertyStatus(propertyId);
       return PropertyModel.fromJson(propertyData);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> savePropertyToFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await propertyService.savePropertyToFavorites(
+        userId: userId,
+        propertyId: propertyId,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> removePropertyFromFavorites({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      await propertyService.removePropertyFromFavorites(
+        userId: userId,
+        propertyId: propertyId,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<PropertyModel>> getFavoriteProperties(String userId) async {
+    try {
+      final propertiesData =
+          await propertyService.getFavoriteProperties(userId);
+      return propertiesData.map((data) => PropertyModel.fromJson(data)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> isPropertyFavorited({
+    required String userId,
+    required String propertyId,
+  }) async {
+    try {
+      return await propertyService.isPropertyFavorited(
+        userId: userId,
+        propertyId: propertyId,
+      );
     } catch (e) {
       rethrow;
     }

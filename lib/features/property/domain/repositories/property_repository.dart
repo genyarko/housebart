@@ -115,4 +115,25 @@ abstract class PropertyRepository {
 
   /// Toggle property active status
   Future<Either<Failure, Property>> togglePropertyStatus(String propertyId);
+
+  /// Save property to favorites
+  Future<Either<Failure, void>> savePropertyToFavorites({
+    required String userId,
+    required String propertyId,
+  });
+
+  /// Remove property from favorites
+  Future<Either<Failure, void>> removePropertyFromFavorites({
+    required String userId,
+    required String propertyId,
+  });
+
+  /// Get user's favorite properties
+  Future<Either<Failure, List<Property>>> getFavoriteProperties(String userId);
+
+  /// Check if property is favorited by user
+  Future<Either<Failure, bool>> isPropertyFavorited({
+    required String userId,
+    required String propertyId,
+  });
 }

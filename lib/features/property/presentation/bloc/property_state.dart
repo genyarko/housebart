@@ -170,3 +170,27 @@ class PropertiesEmpty extends PropertyState {
   @override
   List<Object?> get props => [message];
 }
+
+/// State when favorite status is toggled
+class PropertyFavoriteToggled extends PropertyState {
+  final String propertyId;
+  final bool isFavorited;
+
+  const PropertyFavoriteToggled({
+    required this.propertyId,
+    required this.isFavorited,
+  });
+
+  @override
+  List<Object?> get props => [propertyId, isFavorited];
+}
+
+/// State when favorite properties are loaded
+class FavoritePropertiesLoaded extends PropertyState {
+  final List<Property> properties;
+
+  const FavoritePropertiesLoaded(this.properties);
+
+  @override
+  List<Object?> get props => [properties];
+}
