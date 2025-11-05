@@ -7,6 +7,8 @@ import 'services/auth_service.dart';
 import 'services/realtime_service.dart';
 import 'services/property_service.dart';
 import 'services/barter_service.dart';
+import 'services/messaging_service.dart';
+import 'services/verification_service.dart';
 
 // Features - Auth
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -45,6 +47,28 @@ import 'features/matching/domain/usecases/get_received_requests_usecase.dart';
 import 'features/matching/domain/usecases/find_matches_usecase.dart';
 import 'features/matching/presentation/bloc/matching_bloc.dart';
 
+// Features - Messaging
+import 'features/messaging/data/datasources/messaging_remote_datasource.dart';
+import 'features/messaging/data/repositories/messaging_repository_impl.dart';
+import 'features/messaging/domain/repositories/messaging_repository.dart';
+import 'features/messaging/domain/usecases/send_message_usecase.dart';
+import 'features/messaging/domain/usecases/get_messages_usecase.dart';
+import 'features/messaging/domain/usecases/get_conversations_usecase.dart';
+import 'features/messaging/domain/usecases/mark_as_read_usecase.dart';
+import 'features/messaging/presentation/bloc/messaging_bloc.dart';
+
+// Features - Verification
+import 'features/verification/data/datasources/verification_remote_datasource.dart';
+import 'features/verification/data/repositories/verification_repository_impl.dart';
+import 'features/verification/domain/repositories/verification_repository.dart';
+import 'features/verification/domain/usecases/create_verification_request_usecase.dart';
+import 'features/verification/domain/usecases/get_verification_request_by_id_usecase.dart';
+import 'features/verification/domain/usecases/get_user_verification_requests_usecase.dart';
+import 'features/verification/domain/usecases/get_property_verification_usecase.dart';
+import 'features/verification/domain/usecases/create_payment_intent_usecase.dart';
+import 'features/verification/domain/usecases/confirm_payment_usecase.dart';
+import 'features/verification/presentation/bloc/verification_bloc.dart';
+
 // Global service locator instance
 final sl = GetIt.instance;
 
@@ -59,6 +83,12 @@ Future<void> init() async {
 
   //! Features - Matching/Barter
   _initMatching();
+
+  //! Features - Messaging
+  _initMessaging();
+
+  //! Features - Verification
+  _initVerification();
 
   //! Core Services
   await _initCore();
@@ -178,6 +208,72 @@ void _initMatching() {
   );
 }
 
+/// Initialize messaging feature dependencies
+void _initMessaging() {
+  // Bloc
+  sl.registerFactory(
+    () => MessagingBloc(
+      sendMessageUseCase: sl(),
+      getMessagesUseCase: sl(),
+      getConversationsUseCase: sl(),
+      markAsReadUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => SendMessageUseCase(sl()));
+  sl.registerLazySingleton(() => GetMessagesUseCase(sl()));
+  sl.registerLazySingleton(() => GetConversationsUseCase(sl()));
+  sl.registerLazySingleton(() => MarkAsReadUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<MessagingRepository>(
+    () => MessagingRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<MessagingRemoteDataSource>(
+    () => MessagingRemoteDataSourceImpl(messagingService: sl()),
+  );
+}
+
+/// Initialize verification feature dependencies
+void _initVerification() {
+  // Bloc
+  sl.registerFactory(
+    () => VerificationBloc(
+      createVerificationRequestUseCase: sl(),
+      getVerificationRequestByIdUseCase: sl(),
+      getUserVerificationRequestsUseCase: sl(),
+      getPropertyVerificationUseCase: sl(),
+      createPaymentIntentUseCase: sl(),
+      confirmPaymentUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => CreateVerificationRequestUseCase(sl()));
+  sl.registerLazySingleton(() => GetVerificationRequestByIdUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserVerificationRequestsUseCase(sl()));
+  sl.registerLazySingleton(() => GetPropertyVerificationUseCase(sl()));
+  sl.registerLazySingleton(() => CreatePaymentIntentUseCase(sl()));
+  sl.registerLazySingleton(() => ConfirmPaymentUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<VerificationRepository>(
+    () => VerificationRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<VerificationRemoteDataSource>(
+    () => VerificationRemoteDataSourceImpl(verificationService: sl()),
+  );
+}
+
 /// Initialize core services
 Future<void> _initCore() async {
   // Supabase services
@@ -185,8 +281,8 @@ Future<void> _initCore() async {
   sl.registerLazySingleton(() => RealtimeService());
   sl.registerLazySingleton(() => PropertyService());
   sl.registerLazySingleton(() => BarterService());
-
-  // Note: Messaging and other services will be added here as they're implemented
+  sl.registerLazySingleton(() => MessagingService());
+  sl.registerLazySingleton(() => VerificationService());
 }
 
 /// Initialize external dependencies

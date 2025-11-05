@@ -10,6 +10,9 @@ import '../features/property/presentation/pages/properties_list_page.dart';
 import '../features/property/presentation/pages/property_details_page.dart';
 import '../features/property/presentation/pages/add_property_page.dart';
 import '../features/property/presentation/pages/my_properties_page.dart';
+import '../features/messaging/presentation/pages/conversations_page.dart';
+import '../features/messaging/presentation/pages/chat_page.dart';
+import '../features/verification/presentation/pages/request_verification_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -72,9 +75,43 @@ class AppRouter {
         builder: (context, state) => const MyPropertiesPage(),
       ),
 
+      // Messaging Routes
+      GoRoute(
+        path: AppRoutes.conversations,
+        name: 'conversations',
+        builder: (context, state) => const ConversationsPage(),
+      ),
+      GoRoute(
+        path: '/messages/:barterId',
+        name: 'chat',
+        builder: (context, state) {
+          final barterId = state.pathParameters['barterId']!;
+          // Extract optional query parameters
+          final otherUserId = state.uri.queryParameters['otherUserId'] ?? '';
+          final otherUserName = state.uri.queryParameters['otherUserName'];
+          final otherUserAvatar = state.uri.queryParameters['otherUserAvatar'];
+
+          return ChatPage(
+            barterId: barterId,
+            otherUserId: otherUserId,
+            otherUserName: otherUserName,
+            otherUserAvatar: otherUserAvatar,
+          );
+        },
+      ),
+
+      // Verification Routes
+      GoRoute(
+        path: '/verification/request/:propertyId',
+        name: 'requestVerification',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['propertyId']!;
+          return RequestVerificationPage(propertyId: propertyId);
+        },
+      ),
+
       // TODO: Add more routes as features are implemented
       // - Barter requests
-      // - Messages
       // - Profile
       // - etc.
     ],
