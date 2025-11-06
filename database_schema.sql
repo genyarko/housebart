@@ -36,9 +36,11 @@ CREATE TABLE public.messages (
   is_read boolean DEFAULT false,
   read_at timestamp with time zone,
   created_at timestamp with time zone DEFAULT now(),
+  receiver_id uuid,
   CONSTRAINT messages_pkey PRIMARY KEY (id),
   CONSTRAINT messages_barter_request_id_fkey FOREIGN KEY (barter_id) REFERENCES public.barter_requests(id),
-  CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES auth.users(id)
+  CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES auth.users(id),
+  CONSTRAINT messages_receiver_id_fkey FOREIGN KEY (receiver_id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.notifications (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
