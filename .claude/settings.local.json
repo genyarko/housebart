@@ -27,7 +27,9 @@
       "Bash(supabase db dump:*)",
       "Bash(supabase db remote exec:*)",
       "Bash(supabase status:*)",
-      "Bash(flutter build:*)"
+      "Bash(flutter build:*)",
+      "Bash(cat:*)",
+      "Bash(check_barter_requests.sql)"
     ],
     "deny": [],
     "ask": []
