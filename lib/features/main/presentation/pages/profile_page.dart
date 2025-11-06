@@ -3,11 +3,35 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/api_routes.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../profile/presentation/bloc/profile_bloc.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  int _propertiesCount = 0;
+  int _bartersCount = 0;
+  int _savedCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatistics();
+  }
+
+  void _loadStatistics() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.read<ProfileBloc>().add(
+            ProfileStatisticsLoadEvent(userId: authState.user.id),
+          );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,26 +41,31 @@ class ProfilePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // TODO: Navigate to settings page
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings coming soon')),
-              );
-            },
+            onPressed: () => context.push(AppRoutes.settings),
           ),
         ],
       ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is! AuthAuthenticated) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocListener<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileStatistics) {
+            setState(() {
+              _propertiesCount = state.propertiesCount;
+              _bartersCount = state.bartersCount;
+              _savedCount = state.savedCount;
+            });
           }
+        },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            if (state is! AuthAuthenticated) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final user = state.user;
+            final user = state.user;
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
+            return SingleChildScrollView(
+              child: Column(
+                children: [
                 // Profile Header
                 Container(
                   width: double.infinity,
@@ -82,12 +111,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton.icon(
-                        onPressed: () {
-                          // TODO: Navigate to edit profile
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Edit profile coming soon')),
-                          );
-                        },
+                        onPressed: () => context.push(AppRoutes.editProfile),
                         icon: const Icon(Icons.edit),
                         label: const Text('Edit Profile'),
                         style: ElevatedButton.styleFrom(
@@ -110,7 +134,7 @@ class ProfilePage extends StatelessWidget {
                         child: _StatCard(
                           icon: Icons.home_outlined,
                           label: 'Properties',
-                          value: '0',
+                          value: '$_propertiesCount',
                           onTap: () => context.push(AppRoutes.myProperties),
                         ),
                       ),
@@ -119,10 +143,11 @@ class ProfilePage extends StatelessWidget {
                         child: _StatCard(
                           icon: Icons.swap_horiz,
                           label: 'Barters',
-                          value: '0',
+                          value: '$_bartersCount',
                           onTap: () {
-                            // Switch to barters tab
-                            // TODO: Implement tab switching
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Barters page coming soon')),
+                            );
                           },
                         ),
                       ),
@@ -131,7 +156,7 @@ class ProfilePage extends StatelessWidget {
                         child: _StatCard(
                           icon: Icons.bookmark_outline,
                           label: 'Saved',
-                          value: '0',
+                          value: '$_savedCount',
                           onTap: () => context.push(AppRoutes.savedProperties),
                         ),
                       ),
@@ -168,101 +193,12 @@ class ProfilePage extends StatelessWidget {
                   ],
                 ),
 
-                _MenuSection(
-                  title: 'Preferences',
-                  items: [
-                    _MenuItem(
-                      icon: Icons.notifications_outlined,
-                      title: 'Notifications',
-                      subtitle: 'Manage notifications',
-                      onTap: () => context.push(AppRoutes.notifications),
-                    ),
-                    _MenuItem(
-                      icon: Icons.settings_outlined,
-                      title: 'Settings',
-                      subtitle: 'App preferences',
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Settings coming soon')),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
-                _MenuSection(
-                  title: 'Support',
-                  items: [
-                    _MenuItem(
-                      icon: Icons.help_outline,
-                      title: 'Help & Support',
-                      subtitle: 'Get help',
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Help coming soon')),
-                        );
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.info_outline,
-                      title: 'About',
-                      subtitle: 'App info',
-                      onTap: () {
-                        showAboutDialog(
-                          context: context,
-                          applicationName: 'HouseBart',
-                          applicationVersion: '1.0.0',
-                          applicationLegalese: '© 2025 HouseBart. All rights reserved.',
-                        );
-                      },
-                    ),
-                  ],
-                ),
-
-                // Logout Button
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            title: const Text('Logout'),
-                            content: const Text('Are you sure you want to logout?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(dialogContext),
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(dialogContext);
-                                  context.read<AuthBloc>().add(AuthLogoutRequested());
-                                },
-                                child: const Text('Logout'),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Logout'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                        padding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                  ),
-                ),
-
                 const SizedBox(height: 24),
               ],
             ),
           );
         },
+      ),
       ),
     );
   }

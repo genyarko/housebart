@@ -18,6 +18,8 @@ import '../features/notifications/presentation/pages/notifications_page.dart';
 import '../features/saved_properties/presentation/pages/saved_properties_page.dart';
 import '../features/search/presentation/pages/search_page.dart';
 import '../features/matching/presentation/pages/create_barter_request_page.dart';
+import '../features/settings/presentation/pages/settings_page.dart';
+import '../features/profile/presentation/pages/edit_profile_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -164,9 +166,19 @@ class AppRouter {
         },
       ),
 
-      // TODO: Add more routes as features are implemented
-      // - Profile
-      // - etc.
+      // Profile Routes
+      GoRoute(
+        path: AppRoutes.editProfile,
+        name: 'editProfile',
+        builder: (context, state) => const EditProfilePage(),
+      ),
+
+      // Settings Routes
+      GoRoute(
+        path: AppRoutes.settings,
+        name: 'settings',
+        builder: (context, state) => const SettingsPage(),
+      ),
     ],
 
     // Error page

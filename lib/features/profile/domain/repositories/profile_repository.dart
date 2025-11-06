@@ -12,4 +12,5 @@ abstract class ProfileRepository {
   });
   Future<Either<Failure, String>> uploadAvatar({required String filePath});
   Future<Either<Failure, void>> deleteAccount();
+  Future<Either<Failure, Map<String, int>>> getProfileStatistics({required String userId});
 }
