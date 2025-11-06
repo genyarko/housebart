@@ -133,14 +133,11 @@ class MatchingBloc extends Bloc<MatchingEvent, MatchingState> {
     result.fold(
       (failure) => emit(MatchingError(failure.message)),
       (requests) {
-        if (requests.isEmpty) {
-          emit(const MatchingEmpty('No barter requests found'));
-        } else {
-          emit(MatchingRequestsLoaded(
-            requests: requests,
-            hasMore: requests.length >= event.limit,
-          ));
-        }
+        emit(MatchingRequestsLoaded(
+          requests: requests,
+          hasMore: requests.length >= event.limit,
+          requestType: 'sent',
+        ));
       },
     );
   }
@@ -163,14 +160,11 @@ class MatchingBloc extends Bloc<MatchingEvent, MatchingState> {
     result.fold(
       (failure) => emit(MatchingError(failure.message)),
       (requests) {
-        if (requests.isEmpty) {
-          emit(const MatchingEmpty('No requests received yet'));
-        } else {
-          emit(MatchingRequestsLoaded(
-            requests: requests,
-            hasMore: requests.length >= event.limit,
-          ));
-        }
+        emit(MatchingRequestsLoaded(
+          requests: requests,
+          hasMore: requests.length >= event.limit,
+          requestType: 'received',
+        ));
       },
     );
   }

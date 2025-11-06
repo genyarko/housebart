@@ -73,6 +73,16 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
   Widget _buildMyRequestsTab() {
     return BlocBuilder<MatchingBloc, MatchingState>(
       builder: (context, state) {
+        // If not in correct state, request data
+        if (state is! MatchingRequestsLoaded ||
+            (state is MatchingRequestsLoaded && state.requestType != 'sent')) {
+          if (state is! MatchingLoading) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.read<MatchingBloc>().add(const MatchingLoadMyRequestsEvent());
+            });
+          }
+        }
+
         if (state is MatchingLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -106,7 +116,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
           );
         }
 
-        if (state is MatchingRequestsLoaded) {
+        if (state is MatchingRequestsLoaded && state.requestType == 'sent') {
           if (state.requests.isEmpty) {
             return Center(
               child: Column(
@@ -201,6 +211,16 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
   Widget _buildReceivedRequestsTab() {
     return BlocBuilder<MatchingBloc, MatchingState>(
       builder: (context, state) {
+        // If not in correct state, request data
+        if (state is! MatchingRequestsLoaded ||
+            (state is MatchingRequestsLoaded && state.requestType != 'received')) {
+          if (state is! MatchingLoading) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.read<MatchingBloc>().add(const MatchingLoadReceivedRequestsEvent());
+            });
+          }
+        }
+
         if (state is MatchingLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -234,7 +254,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
           );
         }
 
-        if (state is MatchingRequestsLoaded) {
+        if (state is MatchingRequestsLoaded && state.requestType == 'received') {
           if (state.requests.isEmpty) {
             return Center(
               child: Column(

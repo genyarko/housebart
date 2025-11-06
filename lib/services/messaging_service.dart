@@ -71,6 +71,11 @@ class MessagingService {
     for (final barter in barters) {
       final barterId = barter['id'] as String;
 
+      // Determine who the other user is
+      final requesterId = barter['requester_id'] as String?;
+      final ownerId = barter['owner_id'] as String?;
+      final otherUserId = userId == requesterId ? ownerId : requesterId;
+
       // Get last message
       final lastMessageResponse = await _client
           .from(ApiRoutes.messagesTable)
@@ -93,6 +98,35 @@ class MessagingService {
 
       final unreadCount = unreadResponse.count;
 
+      // Get other user's profile information
+      String? otherUserName;
+      String? otherUserAvatar;
+
+      if (otherUserId != null) {
+        try {
+          final profileResponse = await _client
+              .from('profiles')
+              .select('first_name, last_name, full_name, avatar_url')
+              .eq('id', otherUserId)
+              .maybeSingle();
+
+          if (profileResponse != null) {
+            // Try full_name first, then first_name + last_name, then first_name only
+            if (profileResponse['full_name'] != null && (profileResponse['full_name'] as String).isNotEmpty) {
+              otherUserName = profileResponse['full_name'] as String;
+            } else if (profileResponse['first_name'] != null) {
+              final firstName = profileResponse['first_name'] as String;
+              final lastName = profileResponse['last_name'] as String?;
+              otherUserName = lastName != null ? '$firstName $lastName' : firstName;
+            }
+            otherUserAvatar = profileResponse['avatar_url'] as String?;
+          }
+        } catch (e) {
+          // If profile fetch fails, continue without profile info
+          print('Failed to fetch profile for user $otherUserId: $e');
+        }
+      }
+
       // Build conversation object
       conversations.add({
         'barter_id': barterId,
@@ -101,6 +135,9 @@ class MessagingService {
         'last_message': lastMessage,
         'unread_count': unreadCount,
         'last_message_at': lastMessage?['created_at'],
+        'other_user_id': otherUserId,
+        'other_user_name': otherUserName,
+        'other_user_avatar': otherUserAvatar,
       });
     }
 
@@ -163,6 +200,11 @@ class MessagingService {
         .eq('id', barterId)
         .single();
 
+    // Determine who the other user is
+    final requesterId = barter['requester_id'] as String?;
+    final ownerId = barter['owner_id'] as String?;
+    final otherUserId = userId == requesterId ? ownerId : requesterId;
+
     // Get last message
     final lastMessageResponse = await _client
         .from(ApiRoutes.messagesTable)
@@ -183,6 +225,35 @@ class MessagingService {
         .eq('is_read', false)
         .count(CountOption.exact);
 
+    // Get other user's profile information
+    String? otherUserName;
+    String? otherUserAvatar;
+
+    if (otherUserId != null) {
+      try {
+        final profileResponse = await _client
+            .from('profiles')
+            .select('first_name, last_name, full_name, avatar_url')
+            .eq('id', otherUserId)
+            .maybeSingle();
+
+        if (profileResponse != null) {
+          // Try full_name first, then first_name + last_name, then first_name only
+          if (profileResponse['full_name'] != null && (profileResponse['full_name'] as String).isNotEmpty) {
+            otherUserName = profileResponse['full_name'] as String;
+          } else if (profileResponse['first_name'] != null) {
+            final firstName = profileResponse['first_name'] as String;
+            final lastName = profileResponse['last_name'] as String?;
+            otherUserName = lastName != null ? '$firstName $lastName' : firstName;
+          }
+          otherUserAvatar = profileResponse['avatar_url'] as String?;
+        }
+      } catch (e) {
+        // If profile fetch fails, continue without profile info
+        print('Failed to fetch profile for user $otherUserId: $e');
+      }
+    }
+
     return {
       'barter_id': barterId,
       'user1_id': barter['requester_id'],
@@ -190,6 +261,9 @@ class MessagingService {
       'last_message': lastMessage,
       'unread_count': unreadResponse.count ?? 0,
       'last_message_at': lastMessage?['created_at'],
+      'other_user_id': otherUserId,
+      'other_user_name': otherUserName,
+      'other_user_avatar': otherUserAvatar,
     };
   }
 

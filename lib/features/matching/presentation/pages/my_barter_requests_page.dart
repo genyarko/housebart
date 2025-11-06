@@ -95,7 +95,8 @@ class _MyBarterRequestsPageState extends State<MyBarterRequestsPage>
             return _buildEmptyState(state.message ?? 'No requests found');
           }
 
-          if (state is MatchingRequestsLoaded) {
+          if (state is MatchingRequestsLoaded &&
+              (state.requestType == 'sent' || state.requestType == null)) {
             return RefreshIndicator(
               onRefresh: () async {
                 context.read<MatchingBloc>().add(

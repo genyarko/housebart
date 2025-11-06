@@ -1,11 +1,11 @@
 {
-    "name": "housebart",
-    "short_name": "housebart",
+    "name": "Haus Bart",
+    "short_name": "Haus Bart",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A housing barter system",
+    "description": "Haus Bart - A housing barter system",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

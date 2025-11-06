@@ -169,8 +169,7 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: BlocConsumer<MessagingBloc, MessagingState>(
               listener: (context, state) {
-                if (state is MessagingMessagesLoaded ||
-                    state is MessagingMessageSent) {
+                if (state is MessagingMessagesLoaded) {
                   // Scroll to bottom when new messages arrive
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     _scrollToBottom();
@@ -229,10 +228,6 @@ class _ChatPageState extends State<ChatPage> {
                 List<Message> messages = [];
                 if (state is MessagingMessagesLoaded) {
                   messages = state.messages;
-                } else if (state is MessagingMessageSent) {
-                  // Keep existing messages and add the sent one
-                  // This is a simplified approach; in production you'd want better state management
-                  messages = [state.message];
                 }
 
                 if (messages.isEmpty) {

@@ -33,14 +33,16 @@ class MatchingRequestLoaded extends MatchingState {
 class MatchingRequestsLoaded extends MatchingState {
   final List<BarterRequest> requests;
   final bool hasMore;
+  final String? requestType; // 'sent' or 'received'
 
   const MatchingRequestsLoaded({
     required this.requests,
     this.hasMore = true,
+    this.requestType,
   });
 
   @override
-  List<Object?> get props => [requests, hasMore];
+  List<Object?> get props => [requests, hasMore, requestType];
 }
 
 /// State when a request is created successfully

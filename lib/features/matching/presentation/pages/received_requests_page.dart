@@ -106,7 +106,8 @@ class _ReceivedRequestsPageState extends State<ReceivedRequestsPage>
             return _buildEmptyState(state.message ?? 'No requests received yet');
           }
 
-          if (state is MatchingRequestsLoaded) {
+          if (state is MatchingRequestsLoaded &&
+              (state.requestType == 'received' || state.requestType == null)) {
             return RefreshIndicator(
               onRefresh: () async {
                 context.read<MatchingBloc>().add(

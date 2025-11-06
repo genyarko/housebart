@@ -40,7 +40,10 @@ class MessagingBloc extends Bloc<MessagingEvent, MessagingState> {
 
     result.fold(
       (failure) => emit(MessagingError(failure.message)),
-      (message) => emit(MessagingMessageSent(message)),
+      (message) {
+        // Reload messages after sending to keep the list updated
+        add(MessagingLoadMessagesEvent(event.barterId));
+      },
     );
   }
 

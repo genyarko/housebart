@@ -41,16 +41,16 @@ class _SplashPageState extends State<SplashPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App logo or icon
-              Icon(
-                Icons.home_rounded,
-                size: 100,
-                color: Colors.white,
+              // App logo
+              Image.asset(
+                'assets/images/haus_bart_logo.png',
+                width: 150,
+                height: 150,
               ),
               const SizedBox(height: 24),
               // App name
               const Text(
-                'HouseBart',
+                'Haus Bart',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,

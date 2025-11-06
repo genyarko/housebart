@@ -67,10 +67,10 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Logo
-                      Icon(
-                        Icons.home_rounded,
-                        size: 80,
-                        color: AppColors.primary,
+                      Image.asset(
+                        'assets/images/haus_bart_logo.png',
+                        width: 120,
+                        height: 120,
                       ),
                       const SizedBox(height: 16),
 

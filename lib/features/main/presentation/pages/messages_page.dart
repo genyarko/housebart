@@ -183,9 +183,19 @@ class _MessagesPageState extends State<MessagesPage> {
                           )
                         : null,
                     onTap: () {
+                      if (conversation.otherUserId == null || conversation.otherUserId!.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Error: Invalid conversation data'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
                       context.push(
                         '/messages/${conversation.barterId}?'
-                        'otherUserId=${conversation.otherUserId ?? ''}&'
+                        'otherUserId=${conversation.otherUserId}&'
                         'otherUserName=${Uri.encodeComponent(conversation.otherUserName ?? '')}'
                         '${conversation.otherUserAvatar != null ? '&otherUserAvatar=${Uri.encodeComponent(conversation.otherUserAvatar!)}' : ''}',
                       );

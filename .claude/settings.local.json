@@ -29,7 +29,12 @@
       "Bash(supabase status:*)",
       "Bash(flutter build:*)",
       "Bash(cat:*)",
-      "Bash(check_barter_requests.sql)"
+      "Bash(check_barter_requests.sql)",
+      "Bash(vercel --version:*)",
+      "Bash(vercel deploy:*)",
+      "Bash(vercel domains add:*)",
+      "Bash(vercel domains:*)",
+      "Bash(vercel project:*)"
     ],
     "deny": [],
     "ask": []
