@@ -84,4 +84,39 @@ class ProfileService {
       throw ServerException('Failed to upload avatar: ${e.toString()}');
     }
   }
+
+  Future<Map<String, int>> getProfileStatistics({required String userId}) async {
+    try {
+      // Get properties count
+      final propertiesResponse = await _client
+          .from(ApiRoutes.propertiesTable)
+          .select('id')
+          .eq('owner_id', userId)
+          .count(CountOption.exact);
+
+      // Get barters count (both sent and received)
+      final bartersResponse = await _client
+          .from(ApiRoutes.barterRequestsTable)
+          .select('id')
+          .or('requester_id.eq.$userId,owner_id.eq.$userId')
+          .count(CountOption.exact);
+
+      // Get saved properties count
+      final savedResponse = await _client
+          .from(ApiRoutes.savedPropertiesTable)
+          .select('id')
+          .eq('user_id', userId)
+          .count(CountOption.exact);
+
+      return {
+        'properties': propertiesResponse.count,
+        'barters': bartersResponse.count,
+        'saved': savedResponse.count,
+      };
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, e.code);
+    } catch (e) {
+      throw ServerException('Failed to get profile statistics: ${e.toString()}');
+    }
+  }
 }

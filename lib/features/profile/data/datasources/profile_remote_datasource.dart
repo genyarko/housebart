@@ -14,6 +14,7 @@ abstract class ProfileRemoteDataSource {
     required String userId,
     required String filePath,
   });
+  Future<Map<String, int>> getProfileStatistics({required String userId});
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -54,5 +55,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       userId: userId,
       filePath: filePath,
     );
+  }
+
+  @override
+  Future<Map<String, int>> getProfileStatistics({required String userId}) async {
+    return await profileService.getProfileStatistics(userId: userId);
   }
 }

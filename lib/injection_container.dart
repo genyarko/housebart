@@ -12,6 +12,7 @@ import 'services/verification_service.dart';
 import 'services/notification_service.dart';
 import 'services/saved_properties_service.dart';
 import 'services/search_service.dart';
+import 'services/profile_service_ext.dart';
 
 // Features - Auth
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -105,6 +106,15 @@ import 'features/search/domain/usecases/search_properties_usecase.dart';
 import 'features/search/domain/usecases/get_search_suggestions_usecase.dart';
 import 'features/search/presentation/bloc/search_bloc.dart';
 
+// Features - Profile
+import 'features/profile/data/datasources/profile_remote_datasource.dart';
+import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/get_user_profile_usecase.dart';
+import 'features/profile/domain/usecases/update_profile_usecase.dart';
+import 'features/profile/domain/usecases/get_profile_statistics_usecase.dart';
+import 'features/profile/presentation/bloc/profile_bloc.dart';
+
 // Global service locator instance
 final sl = GetIt.instance;
 
@@ -134,6 +144,9 @@ Future<void> init() async {
 
   //! Features - Search
   _initSearch();
+
+  //! Features - Profile
+  _initProfile();
 
   //! Core Services
   await _initCore();
@@ -418,6 +431,35 @@ void _initSearch() {
   );
 }
 
+/// Initialize profile feature dependencies
+void _initProfile() {
+  // Bloc
+  sl.registerFactory(
+    () => ProfileBloc(
+      getUserProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
+      getProfileStatisticsUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+  sl.registerLazySingleton(() => GetProfileStatisticsUseCase(repository: sl()));
+
+  // Repository
+  sl.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(profileService: sl()),
+  );
+}
+
 /// Initialize core services
 Future<void> _initCore() async {
   // Supabase services
@@ -430,6 +472,7 @@ Future<void> _initCore() async {
   sl.registerLazySingleton(() => NotificationService());
   sl.registerLazySingleton(() => SavedPropertiesService());
   sl.registerLazySingleton(() => SearchService());
+  sl.registerLazySingleton(() => ProfileService());
 }
 
 /// Initialize external dependencies

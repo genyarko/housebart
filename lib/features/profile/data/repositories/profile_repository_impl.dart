@@ -77,4 +77,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, void>> deleteAccount() async {
     throw UnimplementedError();
   }
+
+  @override
+  Future<Either<Failure, Map<String, int>>> getProfileStatistics({
+    required String userId,
+  }) async {
+    try {
+      final stats = await remoteDataSource.getProfileStatistics(userId: userId);
+      return Right(stats);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, e.code));
+    } catch (e) {
+      return Left(ServerFailure('Failed to get statistics: ${e.toString()}'));
+    }
+  }
 }
