@@ -34,7 +34,9 @@
       "Bash(vercel deploy:*)",
       "Bash(vercel domains add:*)",
       "Bash(vercel domains:*)",
-      "Bash(vercel project:*)"
+      "Bash(vercel project:*)",
+      "Bash(dart analyze:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

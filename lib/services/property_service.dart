@@ -23,6 +23,7 @@ class PropertyService {
     double? latitude,
     double? longitude,
     required String propertyType,
+    required String propertyCategory,
     required int maxGuests,
     required int bedrooms,
     required int bathrooms,
@@ -47,6 +48,7 @@ class PropertyService {
         'country': country,
         'postal_code': postalCode,
         'property_type': propertyType,
+        'property_category': propertyCategory,
         'max_guests': maxGuests,
         'bedrooms': bedrooms,
         'bathrooms': bathrooms,
@@ -132,12 +134,20 @@ class PropertyService {
   Future<List<Map<String, dynamic>>> getProperties({
     int limit = 20,
     int offset = 0,
+    String? propertyCategory,
   }) async {
     try {
-      final response = await _client
+      var query = _client
           .from(ApiRoutes.propertiesTable)
           .select()
-          .eq('is_active', true)
+          .eq('is_active', true);
+
+      // Filter by property category if provided
+      if (propertyCategory != null && propertyCategory.isNotEmpty) {
+        query = query.eq('property_category', propertyCategory);
+      }
+
+      final response = await query
           .order('created_at', ascending: false)
           .range(offset, offset + limit - 1);
 
@@ -185,6 +195,7 @@ class PropertyService {
     String? city,
     String? country,
     String? propertyType,
+    String? propertyCategory,
     int? minGuests,
     DateTime? startDate,
     DateTime? endDate,
@@ -206,6 +217,10 @@ class PropertyService {
 
       if (propertyType != null && propertyType.isNotEmpty) {
         query = query.eq('property_type', propertyType);
+      }
+
+      if (propertyCategory != null && propertyCategory.isNotEmpty) {
+        query = query.eq('property_category', propertyCategory);
       }
 
       if (minGuests != null) {

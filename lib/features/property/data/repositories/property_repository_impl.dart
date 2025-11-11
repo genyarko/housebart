@@ -26,6 +26,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
     double? latitude,
     double? longitude,
     required String propertyType,
+    required String propertyCategory,
     required int maxGuests,
     required int bedrooms,
     required int bathrooms,
@@ -45,6 +46,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
         latitude: latitude,
         longitude: longitude,
         propertyType: propertyType,
+        propertyCategory: propertyCategory,
         maxGuests: maxGuests,
         bedrooms: bedrooms,
         bathrooms: bathrooms,
@@ -78,6 +80,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
     double? latitude,
     double? longitude,
     String? propertyType,
+    String? propertyCategory,
     int? maxGuests,
     int? bedrooms,
     int? bathrooms,
@@ -99,6 +102,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
       if (latitude != null) updates['latitude'] = latitude;
       if (longitude != null) updates['longitude'] = longitude;
       if (propertyType != null) updates['property_type'] = propertyType;
+      if (propertyCategory != null) updates['property_category'] = propertyCategory;
       if (maxGuests != null) updates['max_guests'] = maxGuests;
       if (bedrooms != null) updates['bedrooms'] = bedrooms;
       if (bathrooms != null) updates['bathrooms'] = bathrooms;
@@ -160,11 +164,13 @@ class PropertyRepositoryImpl implements PropertyRepository {
   Future<Either<Failure, List<Property>>> getProperties({
     int limit = 20,
     int offset = 0,
+    String? propertyCategory,
   }) async {
     try {
       final propertyModels = await remoteDataSource.getProperties(
         limit: limit,
         offset: offset,
+        propertyCategory: propertyCategory,
       );
 
       final properties = propertyModels.map((model) => model.toEntity()).toList();
@@ -203,6 +209,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
     String? city,
     String? country,
     String? propertyType,
+    String? propertyCategory,
     int? minGuests,
     DateTime? startDate,
     DateTime? endDate,
@@ -215,6 +222,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
         city: city,
         country: country,
         propertyType: propertyType,
+        propertyCategory: propertyCategory,
         minGuests: minGuests,
         startDate: startDate,
         endDate: endDate,

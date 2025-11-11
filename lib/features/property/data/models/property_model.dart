@@ -9,6 +9,7 @@ class PropertyModel extends Property {
     required super.description,
     required super.location,
     required super.details,
+    required super.propertyCategory,
     required super.images,
     required super.amenities,
     required super.houseRules,
@@ -44,6 +45,9 @@ class PropertyModel extends Property {
         'bathrooms': json['bathrooms'],
         'area_sqft': json['area_sqft'],
       }),
+      propertyCategory: _parsePropertyCategory(
+        json['property_category']?.toString(),
+      ),
       images: json['images'] != null
           ? List<String>.from(json['images'] as List)
           : [],
@@ -93,6 +97,7 @@ class PropertyModel extends Property {
       'bedrooms': detailsModel.bedrooms,
       'bathrooms': detailsModel.bathrooms,
       'area_sqft': detailsModel.areaSqft,
+      'property_category': _propertyCategoryToString(propertyCategory),
       'amenities': amenities,
       'house_rules': houseRules,
       'verification_status': _verificationStatusToString(verificationStatus),
@@ -132,6 +137,32 @@ class PropertyModel extends Property {
     }
   }
 
+  /// Parse property category from string
+  static PropertyCategory _parsePropertyCategory(String? category) {
+    switch (category?.toLowerCase()) {
+      case 'vacation_home':
+        return PropertyCategory.vacationHome;
+      case 'spare_property':
+        return PropertyCategory.spareProperty;
+      case 'primary_home':
+        return PropertyCategory.primaryHome;
+      default:
+        return PropertyCategory.spareProperty;
+    }
+  }
+
+  /// Convert property category to string
+  static String _propertyCategoryToString(PropertyCategory category) {
+    switch (category) {
+      case PropertyCategory.vacationHome:
+        return 'vacation_home';
+      case PropertyCategory.spareProperty:
+        return 'spare_property';
+      case PropertyCategory.primaryHome:
+        return 'primary_home';
+    }
+  }
+
   /// Convert to Property entity
   Property toEntity() => this;
 
@@ -144,6 +175,7 @@ class PropertyModel extends Property {
       description: property.description,
       location: property.location,
       details: property.details,
+      propertyCategory: property.propertyCategory,
       images: property.images,
       amenities: property.amenities,
       houseRules: property.houseRules,

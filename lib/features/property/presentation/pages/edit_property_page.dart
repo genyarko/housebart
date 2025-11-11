@@ -41,6 +41,7 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
   late final TextEditingController _areaSqftController;
 
   late String _selectedPropertyType;
+  late String _selectedPropertyCategory;
   late List<String> _selectedAmenities;
   late List<String> _houseRules;
 
@@ -71,6 +72,7 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
     );
 
     _selectedPropertyType = widget.property.details.propertyType;
+    _selectedPropertyCategory = _propertyCategoryToString(widget.property.propertyCategory);
     _selectedAmenities = List.from(widget.property.amenities);
     _houseRules = List.from(widget.property.houseRules);
   }
@@ -164,6 +166,34 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() => _selectedPropertyType = value!);
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Property Category
+                DropdownButtonFormField<String>(
+                  value: _selectedPropertyCategory,
+                  decoration: const InputDecoration(
+                    labelText: 'Property Category',
+                    border: OutlineInputBorder(),
+                    helperText: 'What type of property are you listing?',
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'vacation_home',
+                      child: Text('Vacation Home'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'spare_property',
+                      child: Text('Spare Home/Property'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'primary_home',
+                      child: Text('Primary Home'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedPropertyCategory = value!);
                   },
                 ),
                 const SizedBox(height: 24),
@@ -464,6 +494,7 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
         'latitude': latitude,
         'longitude': longitude,
         'property_type': _selectedPropertyType,
+        'property_category': _selectedPropertyCategory,
         'max_guests': int.parse(_maxGuestsController.text.trim()),
         'bedrooms': int.parse(_bedroomsController.text.trim()),
         'bathrooms': int.parse(_bathroomsController.text.trim()),
@@ -480,6 +511,18 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
               updates: updates,
             ),
           );
+    }
+  }
+
+  /// Convert PropertyCategory enum to string
+  String _propertyCategoryToString(PropertyCategory category) {
+    switch (category) {
+      case PropertyCategory.vacationHome:
+        return 'vacation_home';
+      case PropertyCategory.spareProperty:
+        return 'spare_property';
+      case PropertyCategory.primaryHome:
+        return 'primary_home';
     }
   }
 }

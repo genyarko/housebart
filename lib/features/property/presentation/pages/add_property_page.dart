@@ -38,6 +38,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   final _areaSqftController = TextEditingController();
 
   String _selectedPropertyType = 'house';
+  String _selectedPropertyCategory = 'spare_property';
   final List<String> _selectedAmenities = [];
   final List<String> _houseRules = [];
   final List<XFile> _selectedImages = [];
@@ -152,6 +153,34 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() => _selectedPropertyType = value!);
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Property Category
+                DropdownButtonFormField<String>(
+                  value: _selectedPropertyCategory,
+                  decoration: const InputDecoration(
+                    labelText: 'Property Category',
+                    border: OutlineInputBorder(),
+                    helperText: 'What type of property are you listing?',
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'vacation_home',
+                      child: Text('Vacation Home'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'spare_property',
+                      child: Text('Spare Home/Property'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'primary_home',
+                      child: Text('Primary Home'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedPropertyCategory = value!);
                   },
                 ),
                 const SizedBox(height: 24),
@@ -656,6 +685,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
               latitude: latitude,
               longitude: longitude,
               propertyType: _selectedPropertyType,
+              propertyCategory: _selectedPropertyCategory,
               maxGuests: int.parse(_maxGuestsController.text.trim()),
               bedrooms: int.parse(_bedroomsController.text.trim()),
               bathrooms: int.parse(_bathroomsController.text.trim()),

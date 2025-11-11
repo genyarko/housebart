@@ -21,11 +21,19 @@ class PropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isVacationHome = property.propertyCategory == PropertyCategory.vacationHome;
+
     return Card(
       elevation: 2,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        side: isVacationHome
+            ? BorderSide(
+                color: AppColors.accent,
+                width: 2,
+              )
+            : BorderSide.none,
       ),
       child: InkWell(
         onTap: onTap,
@@ -87,39 +95,79 @@ class PropertyCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Verification badge
-                  if (property.isVerified)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadiusSmall,
+                  // Badges row
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      // Category badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getCategoryColor(property.propertyCategory).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadiusSmall,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getCategoryIcon(property.propertyCategory),
+                              size: 14,
+                              color: _getCategoryColor(property.propertyCategory),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              property.propertyCategoryDisplay,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _getCategoryColor(property.propertyCategory),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.verified,
-                            size: 14,
-                            color: AppColors.success,
+
+                      // Verification badge
+                      if (property.isVerified)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Verified',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadiusSmall,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.verified,
+                                size: 14,
+                                color: AppColors.success,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Verified',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.success,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -145,14 +193,32 @@ class PropertyCard extends StatelessWidget {
                       child: CircularProgressIndicator(),
                     ),
                   ),
-                  errorWidget: (context, url, error) => Container(
-                    color: AppColors.surfaceLight,
-                    child: const Icon(
-                      Icons.home,
-                      size: 48,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
+                  errorWidget: (context, url, error) {
+                    // Debug: Print error to console
+                    debugPrint('Image load error for ${property.title}: $error');
+                    debugPrint('Image URL: $url');
+                    return Container(
+                      color: AppColors.surfaceLight,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.broken_image,
+                            size: 48,
+                            color: AppColors.textSecondary,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Image failed to load',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 )
               : Container(
                   color: AppColors.surfaceLight,
@@ -210,5 +276,29 @@ class PropertyCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Get color for property category
+  Color _getCategoryColor(PropertyCategory category) {
+    switch (category) {
+      case PropertyCategory.vacationHome:
+        return AppColors.accent; // Golden for vacation homes
+      case PropertyCategory.primaryHome:
+        return AppColors.secondary; // Blue/teal for primary homes
+      case PropertyCategory.spareProperty:
+        return AppColors.primary; // Primary blue for spare properties
+    }
+  }
+
+  /// Get icon for property category
+  IconData _getCategoryIcon(PropertyCategory category) {
+    switch (category) {
+      case PropertyCategory.vacationHome:
+        return Icons.beach_access; // Beach icon for vacation homes
+      case PropertyCategory.primaryHome:
+        return Icons.home; // Home icon for primary homes
+      case PropertyCategory.spareProperty:
+        return Icons.home_work; // Work/spare home icon
+    }
   }
 }

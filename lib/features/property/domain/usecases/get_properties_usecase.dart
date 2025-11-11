@@ -16,6 +16,7 @@ class GetPropertiesUseCase {
     return await repository.getProperties(
       limit: params.limit,
       offset: params.offset,
+      propertyCategory: params.propertyCategory,
     );
   }
 }
@@ -24,12 +25,14 @@ class GetPropertiesUseCase {
 class GetPropertiesParams extends Equatable {
   final int limit;
   final int offset;
+  final String? propertyCategory;
 
   const GetPropertiesParams({
     this.limit = 20,
     this.offset = 0,
+    this.propertyCategory,
   });
 
   @override
-  List<Object> get props => [limit, offset];
+  List<Object?> get props => [limit, offset, propertyCategory];
 }

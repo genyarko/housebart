@@ -18,6 +18,7 @@ abstract class PropertyRepository {
     double? latitude,
     double? longitude,
     required String propertyType,
+    required String propertyCategory,
     required int maxGuests,
     required int bedrooms,
     required int bathrooms,
@@ -39,6 +40,7 @@ abstract class PropertyRepository {
     double? latitude,
     double? longitude,
     String? propertyType,
+    String? propertyCategory,
     int? maxGuests,
     int? bedrooms,
     int? bathrooms,
@@ -58,6 +60,7 @@ abstract class PropertyRepository {
   Future<Either<Failure, List<Property>>> getProperties({
     int limit = 20,
     int offset = 0,
+    String? propertyCategory,
   });
 
   /// Get user's properties
@@ -68,6 +71,7 @@ abstract class PropertyRepository {
     String? city,
     String? country,
     String? propertyType,
+    String? propertyCategory,
     int? minGuests,
     DateTime? startDate,
     DateTime? endDate,

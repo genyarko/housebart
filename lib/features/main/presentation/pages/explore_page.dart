@@ -24,6 +24,7 @@ class _ExplorePageState extends State<ExplorePage> {
   List<dynamic> _cachedProperties = [];
   bool _hasError = false;
   String _errorMessage = '';
+  String? _selectedCategory; // null means "All"
 
   @override
   void initState() {
@@ -37,7 +38,9 @@ class _ExplorePageState extends State<ExplorePage> {
   /// Load or reload property data
   void _loadData() {
     if (!mounted) return;
-    context.read<PropertyBloc>().add(const PropertyLoadRequested());
+    context.read<PropertyBloc>().add(
+      PropertyLoadRequested(propertyCategory: _selectedCategory),
+    );
 
     // Load saved properties - wrap in try-catch to handle errors gracefully
     try {
@@ -211,6 +214,84 @@ class _ExplorePageState extends State<ExplorePage> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                      ),
+
+                      // Category filter chips
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                FilterChip(
+                                  label: const Text('All Properties'),
+                                  selected: _selectedCategory == null,
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _selectedCategory = null;
+                                      _loadData();
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                FilterChip(
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Icon(Icons.beach_access, size: 16),
+                                      SizedBox(width: 4),
+                                      Text('Vacation Homes'),
+                                    ],
+                                  ),
+                                  selected: _selectedCategory == 'vacation_home',
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _selectedCategory = selected ? 'vacation_home' : null;
+                                      _loadData();
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                FilterChip(
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Icon(Icons.home_work, size: 16),
+                                      SizedBox(width: 4),
+                                      Text('Spare Properties'),
+                                    ],
+                                  ),
+                                  selected: _selectedCategory == 'spare_property',
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _selectedCategory = selected ? 'spare_property' : null;
+                                      _loadData();
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                FilterChip(
+                                  label: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Icon(Icons.home, size: 16),
+                                      SizedBox(width: 4),
+                                      Text('Primary Homes'),
+                                    ],
+                                  ),
+                                  selected: _selectedCategory == 'primary_home',
+                                  onSelected: (selected) {
+                                    setState(() {
+                                      _selectedCategory = selected ? 'primary_home' : null;
+                                      _loadData();
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

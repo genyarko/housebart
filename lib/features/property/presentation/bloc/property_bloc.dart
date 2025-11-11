@@ -77,6 +77,7 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
       GetPropertiesParams(
         limit: event.limit,
         offset: event.offset,
+        propertyCategory: event.propertyCategory,
       ),
     );
 
@@ -168,6 +169,7 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
         latitude: event.latitude,
         longitude: event.longitude,
         propertyType: event.propertyType,
+        propertyCategory: event.propertyCategory,
         maxGuests: event.maxGuests,
         bedrooms: event.bedrooms,
         bathrooms: event.bathrooms,
@@ -203,6 +205,7 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
       latitude: updates['latitude'] as double?,
       longitude: updates['longitude'] as double?,
       propertyType: updates['property_type'] as String?,
+      propertyCategory: updates['property_category'] as String?,
       maxGuests: updates['max_guests'] as int?,
       bedrooms: updates['bedrooms'] as int?,
       bathrooms: updates['bathrooms'] as int?,

@@ -14,15 +14,17 @@ class PropertyLoadRequested extends PropertyEvent {
   final int limit;
   final int offset;
   final bool loadMore; // true when loading more for infinite scroll
+  final String? propertyCategory; // filter by category
 
   const PropertyLoadRequested({
     this.limit = 20,
     this.offset = 0,
     this.loadMore = false,
+    this.propertyCategory,
   });
 
   @override
-  List<Object?> get props => [limit, offset, loadMore];
+  List<Object?> get props => [limit, offset, loadMore, propertyCategory];
 }
 
 /// Event to load a single property by ID
@@ -57,6 +59,7 @@ class PropertyCreateRequested extends PropertyEvent {
   final double? latitude;
   final double? longitude;
   final String propertyType;
+  final String propertyCategory;
   final int maxGuests;
   final int bedrooms;
   final int bathrooms;
@@ -75,6 +78,7 @@ class PropertyCreateRequested extends PropertyEvent {
     this.latitude,
     this.longitude,
     required this.propertyType,
+    required this.propertyCategory,
     required this.maxGuests,
     required this.bedrooms,
     required this.bathrooms,
@@ -95,6 +99,7 @@ class PropertyCreateRequested extends PropertyEvent {
         latitude,
         longitude,
         propertyType,
+        propertyCategory,
         maxGuests,
         bedrooms,
         bathrooms,

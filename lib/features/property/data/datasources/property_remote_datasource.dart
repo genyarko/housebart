@@ -15,6 +15,7 @@ abstract class PropertyRemoteDataSource {
     double? latitude,
     double? longitude,
     required String propertyType,
+    required String propertyCategory,
     required int maxGuests,
     required int bedrooms,
     required int bathrooms,
@@ -35,6 +36,7 @@ abstract class PropertyRemoteDataSource {
   Future<List<PropertyModel>> getProperties({
     int limit = 20,
     int offset = 0,
+    String? propertyCategory,
   });
 
   Future<List<PropertyModel>> getUserProperties(String userId);
@@ -43,6 +45,7 @@ abstract class PropertyRemoteDataSource {
     String? city,
     String? country,
     String? propertyType,
+    String? propertyCategory,
     int? minGuests,
     DateTime? startDate,
     DateTime? endDate,
@@ -120,6 +123,7 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
     double? latitude,
     double? longitude,
     required String propertyType,
+    required String propertyCategory,
     required int maxGuests,
     required int bedrooms,
     required int bathrooms,
@@ -139,6 +143,7 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
         latitude: latitude,
         longitude: longitude,
         propertyType: propertyType,
+        propertyCategory: propertyCategory,
         maxGuests: maxGuests,
         bedrooms: bedrooms,
         bathrooms: bathrooms,
@@ -193,11 +198,13 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
   Future<List<PropertyModel>> getProperties({
     int limit = 20,
     int offset = 0,
+    String? propertyCategory,
   }) async {
     try {
       final propertiesData = await propertyService.getProperties(
         limit: limit,
         offset: offset,
+        propertyCategory: propertyCategory,
       );
 
       return propertiesData.map((data) => PropertyModel.fromJson(data)).toList();
@@ -221,6 +228,7 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
     String? city,
     String? country,
     String? propertyType,
+    String? propertyCategory,
     int? minGuests,
     DateTime? startDate,
     DateTime? endDate,
@@ -233,6 +241,7 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
         city: city,
         country: country,
         propertyType: propertyType,
+        propertyCategory: propertyCategory,
         minGuests: minGuests,
         startDate: startDate,
         endDate: endDate,

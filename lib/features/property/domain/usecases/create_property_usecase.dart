@@ -22,6 +22,7 @@ class CreatePropertyUseCase {
       latitude: params.latitude,
       longitude: params.longitude,
       propertyType: params.propertyType,
+      propertyCategory: params.propertyCategory,
       maxGuests: params.maxGuests,
       bedrooms: params.bedrooms,
       bathrooms: params.bathrooms,
@@ -44,6 +45,7 @@ class CreatePropertyParams extends Equatable {
   final double? latitude;
   final double? longitude;
   final String propertyType;
+  final String propertyCategory;
   final int maxGuests;
   final int bedrooms;
   final int bathrooms;
@@ -62,6 +64,7 @@ class CreatePropertyParams extends Equatable {
     this.latitude,
     this.longitude,
     required this.propertyType,
+    required this.propertyCategory,
     required this.maxGuests,
     required this.bedrooms,
     required this.bathrooms,
@@ -82,6 +85,7 @@ class CreatePropertyParams extends Equatable {
         latitude,
         longitude,
         propertyType,
+        propertyCategory,
         maxGuests,
         bedrooms,
         bathrooms,

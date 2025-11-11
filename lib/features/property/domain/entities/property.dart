@@ -8,6 +8,13 @@ enum VerificationStatus {
   rejected,
 }
 
+/// Property category enum
+enum PropertyCategory {
+  vacationHome,
+  spareProperty,
+  primaryHome,
+}
+
 /// Property entity representing an accommodation in the domain layer
 class Property extends Equatable {
   final String id;
@@ -16,6 +23,7 @@ class Property extends Equatable {
   final String description;
   final PropertyLocation location;
   final PropertyDetails details;
+  final PropertyCategory propertyCategory;
   final List<String> images;
   final List<String> amenities;
   final List<String> houseRules;
@@ -34,6 +42,7 @@ class Property extends Equatable {
     required this.description,
     required this.location,
     required this.details,
+    required this.propertyCategory,
     required this.images,
     required this.amenities,
     required this.houseRules,
@@ -64,6 +73,18 @@ class Property extends Equatable {
     return '${averageRating!.toStringAsFixed(1)} (${totalReviews})';
   }
 
+  /// Get property category display text
+  String get propertyCategoryDisplay {
+    switch (propertyCategory) {
+      case PropertyCategory.vacationHome:
+        return 'Vacation Home';
+      case PropertyCategory.spareProperty:
+        return 'Spare Property';
+      case PropertyCategory.primaryHome:
+        return 'Primary Home';
+    }
+  }
+
   /// Copy with
   Property copyWith({
     String? id,
@@ -72,6 +93,7 @@ class Property extends Equatable {
     String? description,
     PropertyLocation? location,
     PropertyDetails? details,
+    PropertyCategory? propertyCategory,
     List<String>? images,
     List<String>? amenities,
     List<String>? houseRules,
@@ -90,6 +112,7 @@ class Property extends Equatable {
       description: description ?? this.description,
       location: location ?? this.location,
       details: details ?? this.details,
+      propertyCategory: propertyCategory ?? this.propertyCategory,
       images: images ?? this.images,
       amenities: amenities ?? this.amenities,
       houseRules: houseRules ?? this.houseRules,
@@ -111,6 +134,7 @@ class Property extends Equatable {
         description,
         location,
         details,
+        propertyCategory,
         images,
         amenities,
         houseRules,
