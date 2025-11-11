@@ -14,15 +14,18 @@ class PropertyInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title
         Text(
           property.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -30,18 +33,18 @@ class PropertyInfoSection extends StatelessWidget {
         // Location
         Row(
           children: [
-            const Icon(
+            Icon(
               Icons.location_on,
               size: 18,
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
                 property.location.fullAddress,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
-                  color: AppColors.textSecondary,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -50,7 +53,7 @@ class PropertyInfoSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Property specs
-        _buildSpecsGrid(),
+        _buildSpecsGrid(context),
         const SizedBox(height: 24),
 
         // Verification status
@@ -61,13 +64,14 @@ class PropertyInfoSection extends StatelessWidget {
 
         // Description section
         _buildSection(
+          context: context,
           title: 'Description',
           child: Text(
             property.description,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               height: 1.5,
-              color: AppColors.textPrimary,
+              color: theme.colorScheme.onSurface,
             ),
           ),
         ),
@@ -76,6 +80,7 @@ class PropertyInfoSection extends StatelessWidget {
         // House rules (if any)
         if (property.houseRules.isNotEmpty)
           _buildSection(
+            context: context,
             title: 'House Rules',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,9 +99,9 @@ class PropertyInfoSection extends StatelessWidget {
                       Expanded(
                         child: Text(
                           rule,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: AppColors.textPrimary,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -110,14 +115,19 @@ class PropertyInfoSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSpecsGrid() {
+  Widget _buildSpecsGrid(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: isDark ? AppColors.darkSurface : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         border: Border.all(
-          color: AppColors.borderLight,
+          color: isDark
+              ? AppColors.darkTextSecondary.withOpacity(0.3)
+              : AppColors.borderLight,
           width: 1,
         ),
       ),
@@ -127,6 +137,7 @@ class PropertyInfoSection extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildSpecItem(
+                  context: context,
                   icon: Icons.home_outlined,
                   label: 'Property Type',
                   value: property.details.propertyType,
@@ -134,6 +145,7 @@ class PropertyInfoSection extends StatelessWidget {
               ),
               Expanded(
                 child: _buildSpecItem(
+                  context: context,
                   icon: Icons.people_outline,
                   label: 'Max Guests',
                   value: '${property.details.maxGuests}',
@@ -146,6 +158,7 @@ class PropertyInfoSection extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildSpecItem(
+                  context: context,
                   icon: Icons.bed_outlined,
                   label: 'Bedrooms',
                   value: '${property.details.bedrooms}',
@@ -153,6 +166,7 @@ class PropertyInfoSection extends StatelessWidget {
               ),
               Expanded(
                 child: _buildSpecItem(
+                  context: context,
                   icon: Icons.bathtub_outlined,
                   label: 'Bathrooms',
                   value: '${property.details.bathrooms}',
@@ -163,6 +177,7 @@ class PropertyInfoSection extends StatelessWidget {
           if (property.details.areaSqft != null) ...[
             const Divider(height: 24),
             _buildSpecItem(
+              context: context,
               icon: Icons.square_foot,
               label: 'Area',
               value: '${property.details.areaSqft} sq ft',
@@ -174,10 +189,13 @@ class PropertyInfoSection extends StatelessWidget {
   }
 
   Widget _buildSpecItem({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
   }) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         Icon(
@@ -188,17 +206,18 @@ class PropertyInfoSection extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: AppColors.textSecondary,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -259,15 +278,22 @@ class PropertyInfoSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSection({required String title, required Widget child}) {
+  Widget _buildSection({
+    required BuildContext context,
+    required String title,
+    required Widget child,
+  }) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),

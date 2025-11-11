@@ -188,23 +188,28 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Widget _buildMapPlaceholder(String address) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       height: 200,
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: isDark ? AppColors.darkSurface : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.borderLight,
+          color: isDark
+              ? AppColors.darkTextSecondary.withOpacity(0.3)
+              : AppColors.borderLight,
           width: 1,
         ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.map,
             size: 48,
-            color: AppColors.textSecondary,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 8),
           Padding(
@@ -212,17 +217,17 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             child: Text(
               address,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Map integration coming soon',
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
               fontSize: 12,
               fontStyle: FontStyle.italic,
             ),
@@ -233,13 +238,18 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Widget _buildOwnerInfo() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: isDark ? AppColors.darkSurface : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.borderLight,
+          color: isDark
+              ? AppColors.darkTextSecondary.withOpacity(0.3)
+              : AppColors.borderLight,
           width: 1,
         ),
       ),
@@ -266,19 +276,20 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Property Owner',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Owner name',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -294,7 +305,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                       '4.8 (12 reviews)',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

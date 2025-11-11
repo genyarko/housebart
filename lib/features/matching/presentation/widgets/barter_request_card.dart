@@ -59,13 +59,17 @@ class BarterRequestCard extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Dates section
-              _buildDatesSection(),
+              _buildDatesSection(context),
               const SizedBox(height: 16),
 
               // Guests info
               Row(
                 children: [
-                  Icon(Icons.people_outline, size: 20, color: AppColors.textSecondary),
+                  Icon(
+                    Icons.people_outline,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Guests: ${request.requesterGuests} ⇄ ${request.ownerGuests}',
@@ -105,13 +109,19 @@ class BarterRequestCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkSurface.withOpacity(0.5)
+                        : AppColors.surfaceLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.message_outlined, size: 18, color: AppColors.textSecondary),
+                      Icon(
+                        Icons.message_outlined,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -144,7 +154,7 @@ class BarterRequestCard extends StatelessWidget {
                 'Created ${_formatDate(request.createdAt)}',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -154,16 +164,21 @@ class BarterRequestCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDatesSection() {
+  Widget _buildDatesSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: isDark
+            ? AppColors.darkSurface.withOpacity(0.5)
+            : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
           _buildDateRow(
+            context: context,
             label: 'You receive',
             start: request.requestedStartDate,
             end: request.requestedEndDate,
@@ -171,6 +186,7 @@ class BarterRequestCard extends StatelessWidget {
           ),
           const Divider(height: 24),
           _buildDateRow(
+            context: context,
             label: 'You offer',
             start: request.offeredStartDate,
             end: request.offeredEndDate,
@@ -182,6 +198,7 @@ class BarterRequestCard extends StatelessWidget {
   }
 
   Widget _buildDateRow({
+    required BuildContext context,
     required String label,
     required DateTime start,
     required DateTime end,
@@ -197,7 +214,7 @@ class BarterRequestCard extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -217,7 +234,7 @@ class BarterRequestCard extends StatelessWidget {
           ),
           child: Text(
             '$duration ${duration == 1 ? 'day' : 'days'}',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               color: AppColors.primary,
               fontWeight: FontWeight.w600,

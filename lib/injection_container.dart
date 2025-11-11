@@ -115,6 +115,10 @@ import 'features/profile/domain/usecases/update_profile_usecase.dart';
 import 'features/profile/domain/usecases/get_profile_statistics_usecase.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 
+// Features - Settings (Theme)
+import 'features/settings/data/repositories/theme_repository.dart';
+import 'features/settings/presentation/bloc/theme_bloc.dart';
+
 // Global service locator instance
 final sl = GetIt.instance;
 
@@ -147,6 +151,9 @@ Future<void> init() async {
 
   //! Features - Profile
   _initProfile();
+
+  //! Features - Settings (Theme)
+  _initSettings();
 
   //! Core Services
   await _initCore();
@@ -458,6 +465,15 @@ void _initProfile() {
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(profileService: sl()),
   );
+}
+
+/// Initialize settings feature dependencies (Theme)
+void _initSettings() {
+  // Bloc
+  sl.registerFactory(() => ThemeBloc(sl()));
+
+  // Repository
+  sl.registerLazySingleton(() => ThemeRepository(sl()));
 }
 
 /// Initialize core services

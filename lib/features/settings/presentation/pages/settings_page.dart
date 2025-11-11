@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/api_routes.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../widgets/theme_selector.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -17,6 +18,9 @@ class SettingsPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Theme Selector
+            const ThemeSelector(),
+
             // Preferences Section
             _MenuSection(
               title: 'Preferences',
@@ -34,16 +38,6 @@ class SettingsPage extends StatelessWidget {
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Language settings coming soon')),
-                    );
-                  },
-                ),
-                _MenuItem(
-                  icon: Icons.dark_mode_outlined,
-                  title: 'Theme',
-                  subtitle: 'Light or dark mode',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Theme settings coming soon')),
                     );
                   },
                 ),

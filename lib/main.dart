@@ -19,6 +19,9 @@ import 'features/notifications/presentation/bloc/notification_bloc.dart';
 import 'features/saved_properties/presentation/bloc/saved_property_bloc.dart';
 import 'features/search/presentation/bloc/search_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'features/settings/presentation/bloc/theme_bloc.dart';
+import 'features/settings/presentation/bloc/theme_event.dart';
+import 'features/settings/presentation/bloc/theme_state.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
@@ -70,6 +73,11 @@ class HouseBartApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // Theme BLoC - available throughout the app
+        BlocProvider(
+          create: (_) => di.sl<ThemeBloc>()..add(const ThemeLoaded()),
+        ),
+
         // Auth BLoC - available throughout the app
         BlocProvider(
           create: (_) => di.sl<AuthBloc>(),
@@ -133,27 +141,31 @@ class HouseBartApp extends StatelessWidget {
             // You can add more resets here as needed
           }
         },
-        child: MaterialApp.router(
-          title: AppConfig.appName,
-          debugShowCheckedModeBanner: false,
+        child: BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, themeState) {
+            return MaterialApp.router(
+              title: AppConfig.appName,
+              debugShowCheckedModeBanner: false,
 
-          // Theme
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.light,
+              // Theme
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeState.themeMode,
 
-          // Router
-          routerConfig: AppRouter.router,
+              // Router
+              routerConfig: AppRouter.router,
 
-          // Locale
-          locale: const Locale('en', 'US'),
-          supportedLocales: const [
-            Locale('en', 'US'),
-          ],
+              // Locale
+              locale: const Locale('en', 'US'),
+              supportedLocales: const [
+                Locale('en', 'US'),
+              ],
 
-          // Builder for additional wrappers if needed
-          builder: (context, child) {
-            return child ?? const SizedBox.shrink();
+              // Builder for additional wrappers if needed
+              builder: (context, child) {
+                return child ?? const SizedBox.shrink();
+              },
+            );
           },
         ),
       ),
