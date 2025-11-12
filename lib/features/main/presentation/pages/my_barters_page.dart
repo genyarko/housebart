@@ -167,10 +167,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                   child: BarterRequestCard(
                     request: request,
                     onTap: () {
-                      // TODO: Navigate to barter request details
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Request details coming soon')),
-                      );
+                      context.push(AppRoutes.barterDetails, extra: request);
                     },
                     onCancel: () {
                       showDialog(
@@ -300,10 +297,7 @@ class _MyBartersPageState extends State<MyBartersPage> with SingleTickerProvider
                     request: request,
                     isReceived: true,
                     onTap: () {
-                      // TODO: Navigate to barter request details
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Request details coming soon')),
-                      );
+                      context.push(AppRoutes.barterDetails, extra: request);
                     },
                     onAccept: () {
                       showDialog(

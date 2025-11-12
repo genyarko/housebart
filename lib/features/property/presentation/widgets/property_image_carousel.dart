@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_colors.dart';
 
@@ -43,22 +44,111 @@ class _PropertyImageCarouselState extends State<PropertyImageCarousel> {
 
     return Stack(
       children: [
-        // Image carousel using PageView
+        // Image carousel using PageView with mouse drag enabled
         SizedBox(
           height: widget.height,
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
+          child: Listener(
+            onPointerSignal: (pointerSignal) {
+              if (pointerSignal is PointerScrollEvent) {
+                // Handle mouse wheel scroll
+                if (pointerSignal.scrollDelta.dy > 0) {
+                  // Scroll down = next image
+                  _nextImage();
+                } else if (pointerSignal.scrollDelta.dy < 0) {
+                  // Scroll up = previous image
+                  _previousImage();
+                }
+              }
             },
-            itemCount: widget.images.length,
-            itemBuilder: (context, index) {
-              return _buildImage(widget.images[index]);
-            },
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                dragDevices: {
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.mouse,
+                },
+                scrollbars: false,
+              ),
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                itemCount: widget.images.length,
+                itemBuilder: (context, index) {
+                  return _buildImage(widget.images[index]);
+                },
+              ),
+            ),
           ),
         ),
+
+        // Left arrow button for desktop
+        if (widget.images.length > 1 && _currentIndex > 0)
+          Positioned(
+            left: 16,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _previousImage,
+                    borderRadius: BorderRadius.circular(30),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.chevron_left,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        // Right arrow button for desktop
+        if (widget.images.length > 1 && _currentIndex < widget.images.length - 1)
+          Positioned(
+            right: 16,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _nextImage,
+                    borderRadius: BorderRadius.circular(30),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.chevron_right,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
         // Page indicators
         if (widget.showIndicators && widget.images.length > 1)
@@ -92,6 +182,26 @@ class _PropertyImageCarouselState extends State<PropertyImageCarousel> {
           ),
       ],
     );
+  }
+
+  void _previousImage() {
+    if (_currentIndex > 0) {
+      _pageController.animateToPage(
+        _currentIndex - 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _nextImage() {
+    if (_currentIndex < widget.images.length - 1) {
+      _pageController.animateToPage(
+        _currentIndex + 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   Widget _buildImage(String imageUrl) {

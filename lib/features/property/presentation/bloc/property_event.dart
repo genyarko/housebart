@@ -66,6 +66,8 @@ class PropertyCreateRequested extends PropertyEvent {
   final int? areaSqft;
   final List<String> amenities;
   final List<String>? houseRules;
+  final String? listingType;
+  final int? karmaPrice;
 
   const PropertyCreateRequested({
     required this.title,
@@ -85,6 +87,8 @@ class PropertyCreateRequested extends PropertyEvent {
     this.areaSqft,
     required this.amenities,
     this.houseRules,
+    this.listingType,
+    this.karmaPrice,
   });
 
   @override
@@ -106,6 +110,8 @@ class PropertyCreateRequested extends PropertyEvent {
         areaSqft,
         amenities,
         houseRules,
+        listingType,
+        karmaPrice,
       ];
 }
 

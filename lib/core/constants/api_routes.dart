@@ -61,7 +61,7 @@ class AppRoutes {
   static const String createBarter = '/barter/create';
   static const String myBarters = '/barters/my-requests';
   static const String receivedBarters = '/barters/received';
-  static const String barterDetails = '/barter/:id';
+  static const String barterDetails = '/barter/details';
 
   // Messaging Routes
   static const String conversations = '/conversations';
@@ -81,6 +81,8 @@ class AppRoutes {
   static const String savedProperties = '/saved-properties';
   static const String settings = '/settings';
   static const String notifications = '/notifications';
+  static const String termsOfService = '/terms-of-service';
+  static const String privacyPolicy = '/privacy-policy';
 
   // Search & Filter Routes
   static const String search = '/search';

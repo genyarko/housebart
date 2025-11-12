@@ -112,21 +112,13 @@ class SettingsPage extends StatelessWidget {
                   icon: Icons.description_outlined,
                   title: 'Terms of Service',
                   subtitle: 'Read our terms',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Terms coming soon')),
-                    );
-                  },
+                  onTap: () => context.push(AppRoutes.termsOfService),
                 ),
                 _MenuItem(
                   icon: Icons.policy_outlined,
                   title: 'Privacy Policy',
                   subtitle: 'Read our policy',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Privacy policy coming soon')),
-                    );
-                  },
+                  onTap: () => context.push(AppRoutes.privacyPolicy),
                 ),
               ],
             ),

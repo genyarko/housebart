@@ -166,6 +166,45 @@ class PropertyCard extends StatelessWidget {
                             ],
                           ),
                         ),
+
+                      // Listing type badge (Karma or Barter)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: property.isKarmaListing
+                              ? AppColors.accent.withOpacity(0.15)
+                              : AppColors.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadiusSmall,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              property.isKarmaListing ? Icons.bolt : Icons.sync,
+                              size: 14,
+                              color: property.isKarmaListing
+                                  ? AppColors.accent
+                                  : AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              property.priceDisplay,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: property.isKarmaListing
+                                    ? AppColors.accent
+                                    : AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ],

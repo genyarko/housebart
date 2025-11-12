@@ -17,6 +17,8 @@ class PropertyModel extends Property {
     super.averageRating,
     required super.totalReviews,
     required super.isActive,
+    super.listingType,
+    super.karmaPrice,
     required super.availableDates,
     required super.createdAt,
     required super.updatedAt,
@@ -65,6 +67,8 @@ class PropertyModel extends Property {
           : null,
       totalReviews: json['total_reviews'] as int? ?? 0,
       isActive: json['is_active'] as bool? ?? true,
+      listingType: _parseListingType(json['listing_type']?.toString()),
+      karmaPrice: json['karma_price'] as int?,
       availableDates: [], // Will be loaded separately
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
@@ -104,6 +108,8 @@ class PropertyModel extends Property {
       'average_rating': averageRating,
       'total_reviews': totalReviews,
       'is_active': isActive,
+      'listing_type': _listingTypeToString(listingType),
+      'karma_price': karmaPrice,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -163,6 +169,27 @@ class PropertyModel extends Property {
     }
   }
 
+  /// Parse listing type from string
+  static ListingType _parseListingType(String? type) {
+    switch (type?.toLowerCase()) {
+      case 'karma_points':
+        return ListingType.karmaPoints;
+      case 'barter':
+      default:
+        return ListingType.barter;
+    }
+  }
+
+  /// Convert listing type to string
+  static String _listingTypeToString(ListingType type) {
+    switch (type) {
+      case ListingType.karmaPoints:
+        return 'karma_points';
+      case ListingType.barter:
+        return 'barter';
+    }
+  }
+
   /// Convert to Property entity
   Property toEntity() => this;
 
@@ -183,6 +210,8 @@ class PropertyModel extends Property {
       averageRating: property.averageRating,
       totalReviews: property.totalReviews,
       isActive: property.isActive,
+      listingType: property.listingType,
+      karmaPrice: property.karmaPrice,
       availableDates: property.availableDates,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,

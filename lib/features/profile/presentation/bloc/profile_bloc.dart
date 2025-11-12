@@ -1,9 +1,11 @@
+import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/usecases/get_user_profile_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
 import '../../domain/usecases/get_profile_statistics_usecase.dart';
+import '../../domain/usecases/upload_avatar_usecase.dart';
 
 // Events
 abstract class ProfileEvent extends Equatable {
@@ -45,6 +47,19 @@ class ProfileStatisticsLoadEvent extends ProfileEvent {
 
   @override
   List<Object?> get props => [userId];
+}
+
+class ProfileAvatarUploadEvent extends ProfileEvent {
+  final Uint8List fileBytes;
+  final String fileName;
+
+  const ProfileAvatarUploadEvent({
+    required this.fileBytes,
+    required this.fileName,
+  });
+
+  @override
+  List<Object?> get props => [fileBytes, fileName];
 }
 
 // States
@@ -100,20 +115,32 @@ class ProfileStatistics extends ProfileState {
   List<Object?> get props => [propertiesCount, bartersCount, savedCount];
 }
 
+class ProfileAvatarUploaded extends ProfileState {
+  final String avatarUrl;
+
+  const ProfileAvatarUploaded(this.avatarUrl);
+
+  @override
+  List<Object?> get props => [avatarUrl];
+}
+
 // BLoC
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetUserProfileUseCase getUserProfileUseCase;
   final UpdateProfileUseCase updateProfileUseCase;
   final GetProfileStatisticsUseCase getProfileStatisticsUseCase;
+  final UploadAvatarUseCase uploadAvatarUseCase;
 
   ProfileBloc({
     required this.getUserProfileUseCase,
     required this.updateProfileUseCase,
     required this.getProfileStatisticsUseCase,
+    required this.uploadAvatarUseCase,
   }) : super(ProfileInitial()) {
     on<ProfileLoadEvent>(_onLoadProfile);
     on<ProfileUpdateEvent>(_onUpdateProfile);
     on<ProfileStatisticsLoadEvent>(_onLoadStatistics);
+    on<ProfileAvatarUploadEvent>(_onUploadAvatar);
   }
 
   Future<void> _onLoadProfile(
@@ -168,6 +195,25 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         bartersCount: stats['barters'] ?? 0,
         savedCount: stats['saved'] ?? 0,
       )),
+    );
+  }
+
+  Future<void> _onUploadAvatar(
+    ProfileAvatarUploadEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(ProfileLoading());
+
+    final result = await uploadAvatarUseCase(
+      UploadAvatarParams(
+        fileBytes: event.fileBytes,
+        fileName: event.fileName,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(ProfileError(failure.message)),
+      (avatarUrl) => emit(ProfileAvatarUploaded(avatarUrl)),
     );
   }
 }

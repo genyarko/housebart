@@ -18,8 +18,14 @@ import '../features/notifications/presentation/pages/notifications_page.dart';
 import '../features/saved_properties/presentation/pages/saved_properties_page.dart';
 import '../features/search/presentation/pages/search_page.dart';
 import '../features/matching/presentation/pages/create_barter_request_page.dart';
+import '../features/matching/presentation/pages/barter_details_page.dart';
+import '../features/main/presentation/pages/my_barters_page.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
+import '../features/settings/presentation/pages/terms_of_service_page.dart';
+import '../features/settings/presentation/pages/privacy_policy_page.dart';
 import '../features/profile/presentation/pages/edit_profile_page.dart';
+import '../features/reviews/presentation/pages/property_reviews_page.dart';
+import '../features/reviews/presentation/pages/create_review_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -96,6 +102,13 @@ class AppRouter {
         builder: (context, state) => const MyPropertiesPage(),
       ),
 
+      // Barter Routes - My Barters
+      GoRoute(
+        path: AppRoutes.myBarters,
+        name: 'myBarters',
+        builder: (context, state) => const MyBartersPage(),
+      ),
+
       // Messaging Routes
       GoRoute(
         path: AppRoutes.conversations,
@@ -165,6 +178,18 @@ class AppRouter {
           return CreateBarterRequestPage(targetProperty: targetProperty as dynamic);
         },
       ),
+      GoRoute(
+        path: AppRoutes.barterDetails,
+        name: 'barterDetails',
+        builder: (context, state) {
+          final request = state.extra;
+          if (request == null) {
+            // If no request is passed, redirect to home
+            return const MainPage();
+          }
+          return BarterDetailsPage(request: request as dynamic);
+        },
+      ),
 
       // Profile Routes
       GoRoute(
@@ -173,11 +198,43 @@ class AppRouter {
         builder: (context, state) => const EditProfilePage(),
       ),
 
+      // Review Routes
+      GoRoute(
+        path: '/property/:id/reviews',
+        name: 'propertyReviews',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['id']!;
+          return PropertyReviewsPage(propertyId: propertyId);
+        },
+      ),
+      GoRoute(
+        path: '/review/create/:barterId',
+        name: 'createReview',
+        builder: (context, state) {
+          final barterId = state.pathParameters['barterId']!;
+          final propertyId = state.uri.queryParameters['propertyId'] ?? '';
+          return CreateReviewPage(
+            barterId: barterId,
+            propertyId: propertyId,
+          );
+        },
+      ),
+
       // Settings Routes
       GoRoute(
         path: AppRoutes.settings,
         name: 'settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.termsOfService,
+        name: 'termsOfService',
+        builder: (context, state) => const TermsOfServicePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacyPolicy,
+        name: 'privacyPolicy',
+        builder: (context, state) => const PrivacyPolicyPage(),
       ),
     ],
 

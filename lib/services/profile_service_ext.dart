@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants/api_routes.dart';
 import '../core/errors/exceptions.dart';
@@ -59,18 +58,19 @@ class ProfileService {
 
   Future<String> uploadAvatar({
     required String userId,
-    required String filePath,
+    required Uint8List fileBytes,
+    required String fileName,
   }) async {
     try {
-      final fileName = '$userId-${DateTime.now().millisecondsSinceEpoch}';
+      final uniqueFileName = '$userId-${DateTime.now().millisecondsSinceEpoch}-$fileName';
 
       await _client.storage
           .from(ApiRoutes.userAvatarsBucket)
-          .upload(fileName, filePath as File);
+          .uploadBinary(uniqueFileName, fileBytes);
 
       final url = _client.storage
           .from(ApiRoutes.userAvatarsBucket)
-          .getPublicUrl(fileName);
+          .getPublicUrl(uniqueFileName);
 
       // Update profile with avatar URL
       await _client

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/api_routes.dart';
 import '../bloc/matching_bloc.dart';
 import '../bloc/matching_event.dart';
 import '../bloc/matching_state.dart';
@@ -123,12 +125,7 @@ class _ReceivedRequestsPageState extends State<ReceivedRequestsPage>
                     request: request,
                     isReceived: true,
                     onTap: () {
-                      // TODO: Navigate to details page
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Details page coming soon'),
-                        ),
-                      );
+                      context.push(AppRoutes.barterDetails, extra: request);
                     },
                     onAccept: request.status.canAccept
                         ? () => _showAcceptDialog(context, request.id)

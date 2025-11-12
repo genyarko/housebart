@@ -15,6 +15,12 @@ enum PropertyCategory {
   primaryHome,
 }
 
+/// Listing type enum
+enum ListingType {
+  barter,
+  karmaPoints,
+}
+
 /// Property entity representing an accommodation in the domain layer
 class Property extends Equatable {
   final String id;
@@ -31,6 +37,8 @@ class Property extends Equatable {
   final double? averageRating;
   final int totalReviews;
   final bool isActive;
+  final ListingType listingType;
+  final int? karmaPrice;
   final List<DateRange> availableDates;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -50,6 +58,8 @@ class Property extends Equatable {
     this.averageRating,
     required this.totalReviews,
     required this.isActive,
+    this.listingType = ListingType.barter,
+    this.karmaPrice,
     required this.availableDates,
     required this.createdAt,
     required this.updatedAt,
@@ -85,6 +95,30 @@ class Property extends Equatable {
     }
   }
 
+  /// Check if property is available for karma points
+  bool get isKarmaListing => listingType == ListingType.karmaPoints;
+
+  /// Check if property is available for barter
+  bool get isBarterListing => listingType == ListingType.barter;
+
+  /// Get listing type display text
+  String get listingTypeDisplay {
+    switch (listingType) {
+      case ListingType.barter:
+        return 'Barter';
+      case ListingType.karmaPoints:
+        return 'Karma Points';
+    }
+  }
+
+  /// Get karma price display (e.g., "50 Karma/day" or "Barter")
+  String get priceDisplay {
+    if (isKarmaListing && karmaPrice != null) {
+      return '$karmaPrice Karma/day';
+    }
+    return 'Barter';
+  }
+
   /// Copy with
   Property copyWith({
     String? id,
@@ -101,6 +135,8 @@ class Property extends Equatable {
     double? averageRating,
     int? totalReviews,
     bool? isActive,
+    ListingType? listingType,
+    int? karmaPrice,
     List<DateRange>? availableDates,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -120,6 +156,8 @@ class Property extends Equatable {
       averageRating: averageRating ?? this.averageRating,
       totalReviews: totalReviews ?? this.totalReviews,
       isActive: isActive ?? this.isActive,
+      listingType: listingType ?? this.listingType,
+      karmaPrice: karmaPrice ?? this.karmaPrice,
       availableDates: availableDates ?? this.availableDates,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -142,6 +180,8 @@ class Property extends Equatable {
         averageRating,
         totalReviews,
         isActive,
+        listingType,
+        karmaPrice,
         availableDates,
         createdAt,
         updatedAt,

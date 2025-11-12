@@ -25,6 +25,8 @@ abstract class PropertyRepository {
     int? areaSqft,
     required List<String> amenities,
     List<String>? houseRules,
+    String? listingType,
+    int? karmaPrice,
   });
 
   /// Update an existing property
@@ -48,6 +50,8 @@ abstract class PropertyRepository {
     List<String>? amenities,
     List<String>? houseRules,
     bool? isActive,
+    String? listingType,
+    int? karmaPrice,
   });
 
   /// Delete a property

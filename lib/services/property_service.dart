@@ -30,6 +30,8 @@ class PropertyService {
     int? areaSqft,
     required List<String> amenities,
     List<String>? houseRules,
+    String? listingType,
+    int? karmaPrice,
   }) async {
     try {
       final userId = _client.auth.currentUser?.id;
@@ -56,6 +58,8 @@ class PropertyService {
         'amenities': amenities,
         'house_rules': houseRules ?? [],
         'is_active': true,
+        'listing_type': listingType ?? 'barter',
+        'karma_price': karmaPrice,
       };
 
       // Add coordinates only if both are provided

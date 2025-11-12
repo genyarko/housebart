@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import '../../../../services/profile_service_ext.dart';
 import '../models/user_profile_model.dart';
 
@@ -12,7 +13,8 @@ abstract class ProfileRemoteDataSource {
   });
   Future<String> uploadAvatar({
     required String userId,
-    required String filePath,
+    required Uint8List fileBytes,
+    required String fileName,
   });
   Future<Map<String, int>> getProfileStatistics({required String userId});
 }
@@ -49,11 +51,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<String> uploadAvatar({
     required String userId,
-    required String filePath,
+    required Uint8List fileBytes,
+    required String fileName,
   }) async {
     return await profileService.uploadAvatar(
       userId: userId,
-      filePath: filePath,
+      fileBytes: fileBytes,
+      fileName: fileName,
     );
   }
 

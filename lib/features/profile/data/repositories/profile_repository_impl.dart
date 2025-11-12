@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -54,7 +55,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, String>> uploadAvatar({required String filePath}) async {
+  Future<Either<Failure, String>> uploadAvatar({
+    required Uint8List fileBytes,
+    required String fileName,
+  }) async {
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) {
@@ -63,7 +67,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       final url = await remoteDataSource.uploadAvatar(
         userId: userId,
-        filePath: filePath,
+        fileBytes: fileBytes,
+        fileName: fileName,
       );
       return Right(url);
     } on ServerException catch (e) {

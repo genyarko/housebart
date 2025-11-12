@@ -33,6 +33,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
     int? areaSqft,
     required List<String> amenities,
     List<String>? houseRules,
+    String? listingType,
+    int? karmaPrice,
   }) async {
     try {
       final propertyModel = await remoteDataSource.createProperty(
@@ -53,6 +55,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
         areaSqft: areaSqft,
         amenities: amenities,
         houseRules: houseRules,
+        listingType: listingType,
+        karmaPrice: karmaPrice,
       );
 
       return Right(propertyModel.toEntity());
@@ -88,6 +92,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
     List<String>? amenities,
     List<String>? houseRules,
     bool? isActive,
+    String? listingType,
+    int? karmaPrice,
   }) async {
     try {
       // Build updates map from provided parameters
@@ -110,6 +116,8 @@ class PropertyRepositoryImpl implements PropertyRepository {
       if (amenities != null) updates['amenities'] = amenities;
       if (houseRules != null) updates['house_rules'] = houseRules;
       if (isActive != null) updates['is_active'] = isActive;
+      if (listingType != null) updates['listing_type'] = listingType;
+      if (karmaPrice != null) updates['karma_price'] = karmaPrice;
 
       final propertyModel = await remoteDataSource.updateProperty(
         propertyId: propertyId,

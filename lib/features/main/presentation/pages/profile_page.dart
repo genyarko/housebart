@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/api_routes.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -82,18 +83,24 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          user.firstName[0].toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
+                      user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                          ? CircleAvatar(
+                              radius: 50,
+                              backgroundColor: Colors.white,
+                              backgroundImage: CachedNetworkImageProvider(user.avatarUrl!),
+                            )
+                          : CircleAvatar(
+                              radius: 50,
+                              backgroundColor: Colors.white,
+                              child: Text(
+                                user.firstName[0].toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
                       const SizedBox(height: 16),
                       Text(
                         '${user.firstName} ${user.lastName}',
@@ -144,11 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           icon: Icons.swap_horiz,
                           label: 'Barters',
                           value: '$_bartersCount',
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Barters page coming soon')),
-                            );
-                          },
+                          onTap: () => context.push(AppRoutes.myBarters),
                         ),
                       ),
                       const SizedBox(width: 12),

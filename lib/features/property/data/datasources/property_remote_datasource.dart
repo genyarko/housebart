@@ -22,6 +22,8 @@ abstract class PropertyRemoteDataSource {
     int? areaSqft,
     required List<String> amenities,
     List<String>? houseRules,
+    String? listingType,
+    int? karmaPrice,
   });
 
   Future<PropertyModel> updateProperty({
@@ -130,6 +132,8 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
     int? areaSqft,
     required List<String> amenities,
     List<String>? houseRules,
+    String? listingType,
+    int? karmaPrice,
   }) async {
     try {
       final propertyData = await propertyService.createProperty(
@@ -150,6 +154,8 @@ class PropertyRemoteDataSourceImpl implements PropertyRemoteDataSource {
         areaSqft: areaSqft,
         amenities: amenities,
         houseRules: houseRules,
+        listingType: listingType,
+        karmaPrice: karmaPrice,
       );
 
       return PropertyModel.fromJson(propertyData);

@@ -29,6 +29,8 @@ class CreatePropertyUseCase {
       areaSqft: params.areaSqft,
       amenities: params.amenities,
       houseRules: params.houseRules,
+      listingType: params.listingType,
+      karmaPrice: params.karmaPrice,
     );
   }
 }
@@ -52,6 +54,8 @@ class CreatePropertyParams extends Equatable {
   final int? areaSqft;
   final List<String> amenities;
   final List<String>? houseRules;
+  final String? listingType;
+  final int? karmaPrice;
 
   const CreatePropertyParams({
     required this.title,
@@ -71,6 +75,8 @@ class CreatePropertyParams extends Equatable {
     this.areaSqft,
     required this.amenities,
     this.houseRules,
+    this.listingType,
+    this.karmaPrice,
   });
 
   @override
@@ -92,5 +98,7 @@ class CreatePropertyParams extends Equatable {
         areaSqft,
         amenities,
         houseRules,
+        listingType,
+        karmaPrice,
       ];
 }

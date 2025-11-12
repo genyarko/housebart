@@ -36,7 +36,9 @@
       "Bash(vercel domains:*)",
       "Bash(vercel project:*)",
       "Bash(dart analyze:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(supabase db remote psql:*)",
+      "Bash(supabase db:*)"
     ],
     "deny": [],
     "ask": []

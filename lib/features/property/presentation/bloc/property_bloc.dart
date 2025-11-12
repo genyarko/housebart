@@ -176,6 +176,8 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
         areaSqft: event.areaSqft,
         amenities: event.amenities,
         houseRules: event.houseRules,
+        listingType: event.listingType,
+        karmaPrice: event.karmaPrice,
       ),
     );
 
@@ -213,6 +215,8 @@ class PropertyBloc extends Bloc<PropertyEvent, PropertyState> {
       amenities: updates['amenities'] as List<String>?,
       houseRules: updates['house_rules'] as List<String>?,
       isActive: updates['is_active'] as bool?,
+      listingType: updates['listing_type'] as String?,
+      karmaPrice: updates['karma_price'] as int?,
     );
 
     result.fold(

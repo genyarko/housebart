@@ -9,6 +9,9 @@ import '../bloc/property_state.dart';
 import '../widgets/property_image_carousel.dart';
 import '../widgets/property_info_section.dart';
 import '../widgets/property_amenities_list.dart';
+import '../../../reviews/presentation/bloc/review_bloc.dart';
+import '../../../reviews/presentation/widgets/review_summary.dart';
+import '../../../reviews/presentation/widgets/review_card.dart';
 
 /// Page for displaying single property details
 class PropertyDetailsPage extends StatefulWidget {
@@ -31,10 +34,18 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     context.read<PropertyBloc>().add(
           PropertyLoadByIdRequested(widget.propertyId),
         );
+    // Load property reviews
+    context.read<ReviewBloc>().add(
+          ReviewLoadPropertyReviewsEvent(propertyId: widget.propertyId),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Calculate responsive image height based on screen size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageHeight = screenWidth >= 900 ? 500.0 : 300.0;
+
     return Scaffold(
       body: BlocConsumer<PropertyBloc, PropertyState>(
         listener: (context, state) {
@@ -58,12 +69,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               slivers: [
                 // App bar with image
                 SliverAppBar(
-                  expandedHeight: 300,
+                  expandedHeight: imageHeight,
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
                     background: PropertyImageCarousel(
                       images: property.images,
-                      height: 300,
+                      height: imageHeight,
                     ),
                   ),
                   actions: [
@@ -136,6 +147,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
                         // Owner info placeholder
                         _buildOwnerInfo(),
+                        const SizedBox(height: 24),
+
+                        // Reviews section
+                        _buildReviewsSection(),
                         const SizedBox(height: 100), // Space for FAB
                       ],
                     ),
@@ -329,6 +344,136 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildReviewsSection() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Reviews',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            BlocBuilder<ReviewBloc, ReviewState>(
+              builder: (context, state) {
+                if (state is ReviewsLoaded && state.reviews.isNotEmpty) {
+                  return TextButton(
+                    onPressed: () {
+                      context.push(
+                        AppRoutes.propertyReviewsPath(widget.propertyId),
+                      );
+                    },
+                    child: const Text('See all'),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        BlocBuilder<ReviewBloc, ReviewState>(
+          builder: (context, state) {
+            if (state is ReviewLoading) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            if (state is ReviewsLoaded) {
+              final reviews = state.reviews;
+
+              if (reviews.isEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.darkTextSecondary.withOpacity(0.3)
+                          : AppColors.borderLight,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.rate_review_outlined,
+                        size: 48,
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No reviews yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Be the first to review this property',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // Calculate average rating
+              final totalRating = reviews.fold<int>(
+                0,
+                (sum, review) => sum + review.rating,
+              );
+              final averageRating = totalRating / reviews.length;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Review summary - tappable to see all reviews
+                  ReviewSummary(
+                    averageRating: averageRating,
+                    totalReviews: reviews.length,
+                    onTap: () {
+                      context.push(
+                        AppRoutes.propertyReviewsPath(widget.propertyId),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Show first 3 reviews
+                  ...reviews.take(3).map(
+                        (review) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: ReviewCard(review: review),
+                        ),
+                      ),
+                ],
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
+        ),
+      ],
     );
   }
 }

@@ -13,6 +13,7 @@ import 'services/notification_service.dart';
 import 'services/saved_properties_service.dart';
 import 'services/search_service.dart';
 import 'services/profile_service_ext.dart';
+import 'services/review_service.dart';
 
 // Features - Auth
 import 'features/auth/data/datasources/auth_remote_datasource.dart';
@@ -113,11 +114,20 @@ import 'features/profile/domain/repositories/profile_repository.dart';
 import 'features/profile/domain/usecases/get_user_profile_usecase.dart';
 import 'features/profile/domain/usecases/update_profile_usecase.dart';
 import 'features/profile/domain/usecases/get_profile_statistics_usecase.dart';
+import 'features/profile/domain/usecases/upload_avatar_usecase.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 
 // Features - Settings (Theme)
 import 'features/settings/data/repositories/theme_repository.dart';
 import 'features/settings/presentation/bloc/theme_bloc.dart';
+
+// Features - Reviews
+import 'features/reviews/data/datasources/review_remote_datasource.dart';
+import 'features/reviews/data/repositories/review_repository_impl.dart';
+import 'features/reviews/domain/repositories/review_repository.dart';
+import 'features/reviews/domain/usecases/create_review_usecase.dart';
+import 'features/reviews/domain/usecases/get_property_reviews_usecase.dart';
+import 'features/reviews/presentation/bloc/review_bloc.dart';
 
 // Global service locator instance
 final sl = GetIt.instance;
@@ -154,6 +164,9 @@ Future<void> init() async {
 
   //! Features - Settings (Theme)
   _initSettings();
+
+  //! Features - Reviews
+  _initReviews();
 
   //! Core Services
   await _initCore();
@@ -446,6 +459,7 @@ void _initProfile() {
       getUserProfileUseCase: sl(),
       updateProfileUseCase: sl(),
       getProfileStatisticsUseCase: sl(),
+      uploadAvatarUseCase: sl(),
     ),
   );
 
@@ -453,6 +467,7 @@ void _initProfile() {
   sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => GetProfileStatisticsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UploadAvatarUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<ProfileRepository>(
@@ -476,6 +491,33 @@ void _initSettings() {
   sl.registerLazySingleton(() => ThemeRepository(sl()));
 }
 
+/// Initialize reviews feature dependencies
+void _initReviews() {
+  // Bloc
+  sl.registerFactory(
+    () => ReviewBloc(
+      createReviewUseCase: sl(),
+      getPropertyReviewsUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => CreateReviewUseCase(sl()));
+  sl.registerLazySingleton(() => GetPropertyReviewsUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ReviewRepository>(
+    () => ReviewRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<ReviewRemoteDataSource>(
+    () => ReviewRemoteDataSourceImpl(reviewService: sl()),
+  );
+}
+
 /// Initialize core services
 Future<void> _initCore() async {
   // Supabase services
@@ -489,6 +531,7 @@ Future<void> _initCore() async {
   sl.registerLazySingleton(() => SavedPropertiesService());
   sl.registerLazySingleton(() => SearchService());
   sl.registerLazySingleton(() => ProfileService());
+  sl.registerLazySingleton(() => ReviewService());
 }
 
 /// Initialize external dependencies

@@ -42,6 +42,8 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
 
   late String _selectedPropertyType;
   late String _selectedPropertyCategory;
+  late String _selectedListingType;
+  late final TextEditingController _karmaPriceController;
   late List<String> _selectedAmenities;
   late List<String> _houseRules;
 
@@ -73,6 +75,10 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
 
     _selectedPropertyType = widget.property.details.propertyType;
     _selectedPropertyCategory = _propertyCategoryToString(widget.property.propertyCategory);
+    _selectedListingType = _listingTypeToString(widget.property.listingType);
+    _karmaPriceController = TextEditingController(
+      text: widget.property.karmaPrice?.toString() ?? '',
+    );
     _selectedAmenities = List.from(widget.property.amenities);
     _houseRules = List.from(widget.property.houseRules);
   }
@@ -92,6 +98,7 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
     _bedroomsController.dispose();
     _bathroomsController.dispose();
     _areaSqftController.dispose();
+    _karmaPriceController.dispose();
     super.dispose();
   }
 
@@ -196,6 +203,124 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
                     setState(() => _selectedPropertyCategory = value!);
                   },
                 ),
+                const SizedBox(height: 16),
+
+                // Listing Type Section
+                _buildSectionTitle('Listing Type'),
+                const SizedBox(height: 8),
+                Text(
+                  'Choose how guests can book your property',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Listing Type Selection
+                DropdownButtonFormField<String>(
+                  value: _selectedListingType,
+                  decoration: const InputDecoration(
+                    labelText: 'Payment Method',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.payment),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'barter',
+                      child: Row(
+                        children: [
+                          Icon(Icons.sync, size: 20),
+                          SizedBox(width: 8),
+                          Text('Barter (Exchange Properties)'),
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'karma_points',
+                      child: Row(
+                        children: [
+                          Icon(Icons.bolt, size: 20, color: AppColors.accent),
+                          SizedBox(width: 8),
+                          Text('Karma Points'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedListingType = value!;
+                      if (value == 'barter') {
+                        _karmaPriceController.clear();
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Karma Price (only shown if karma_points selected)
+                if (_selectedListingType == 'karma_points')
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: _karmaPriceController,
+                        decoration: InputDecoration(
+                          labelText: 'Karma Price (Per Day)',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.bolt, color: AppColors.accent),
+                          suffixText: 'Karma Points/Day',
+                          helperText: 'How many karma points per day (24 hours)?',
+                        ),
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        validator: (value) {
+                          if (_selectedListingType == 'karma_points') {
+                            if (value == null || value.isEmpty) {
+                              return 'Karma price is required';
+                            }
+                            final price = int.tryParse(value);
+                            if (price == null || price < 1) {
+                              return 'Price must be at least 1 karma point';
+                            }
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.accent.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline,
+                              size: 20,
+                              color: AppColors.accent,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Karma points allow users to book your property without offering their own. Charges are calculated per day (24 hours). Example: 50 karma/day × 3 days = 150 karma total.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: 24),
 
                 // Location Section
@@ -478,6 +603,15 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
       final latitude = latText.isNotEmpty ? double.tryParse(latText) : null;
       final longitude = lngText.isNotEmpty ? double.tryParse(lngText) : null;
 
+      // Parse karma price if listing type is karma_points
+      int? karmaPrice;
+      if (_selectedListingType == 'karma_points') {
+        final karmaPriceText = _karmaPriceController.text.trim();
+        if (karmaPriceText.isNotEmpty) {
+          karmaPrice = int.tryParse(karmaPriceText);
+        }
+      }
+
       // Build updates map
       final updates = <String, dynamic>{
         'title': _titleController.text.trim(),
@@ -503,6 +637,8 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
             : null,
         'amenities': _selectedAmenities,
         'house_rules': _houseRules.isNotEmpty ? _houseRules : null,
+        'listing_type': _selectedListingType,
+        'karma_price': karmaPrice,
       };
 
       context.read<PropertyBloc>().add(
@@ -523,6 +659,16 @@ class _EditPropertyPageState extends State<EditPropertyPage> {
         return 'spare_property';
       case PropertyCategory.primaryHome:
         return 'primary_home';
+    }
+  }
+
+  /// Convert ListingType enum to string
+  String _listingTypeToString(ListingType type) {
+    switch (type) {
+      case ListingType.karmaPoints:
+        return 'karma_points';
+      case ListingType.barter:
+        return 'barter';
     }
   }
 }

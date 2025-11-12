@@ -87,17 +87,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> getCurrentUser() async {
     try {
-      // Try to get from cache first
-      final cachedUser = await localDataSource.getCachedUser();
-
-      if (cachedUser != null) {
-        return Right(cachedUser.toEntity());
-      }
-
-      // If not cached, fetch from remote
+      // Always fetch fresh data from remote to ensure we have latest profile updates
+      // (avatar, bio, etc.)
       final user = await remoteDataSource.getCurrentUser();
 
-      // Cache for next time
+      // Update cache with fresh data
       await localDataSource.cacheUser(user);
 
       return Right(user.toEntity());
@@ -112,6 +106,15 @@ class AuthRepositoryImpl implements AuthRepository {
         return Left(CacheFailure(e.message, e.code));
       }
     } catch (e) {
+      // Fallback to cache if remote fails
+      try {
+        final cachedUser = await localDataSource.getCachedUser();
+        if (cachedUser != null) {
+          return Right(cachedUser.toEntity());
+        }
+      } catch (_) {
+        // Ignore cache errors in fallback
+      }
       return Left(ServerFailure('Failed to get current user: ${e.toString()}'));
     }
   }
